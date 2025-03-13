@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Advanced Cartoon Table</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap");
+
+      body {
+        display: flex;
+        height: 100vh;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #ffec99, #ff80ab);
+        overflow: hidden;
+      }
+
+      .table-container {
+        perspective: 1000px;
+      }
+
+      table {
+        width: 80%;
+        max-width: 1000px;
+        background: #fff9c4;
+        border-radius: 20px;
+        border: 8px solid #ff6f61;
+        padding: 15px;
+        box-shadow: 10px 10px 0px #000, 15px 15px 0px #ff6f61;
+        font-family: "Fredoka One", cursive;
+        transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+        position: relative;
+      }
+
+      /* Mouse movement effect */
+      .table-container:hover table {
+        transform: rotateX(var(--rotateX)) rotateY(var(--rotateY));
+      }
+
+      caption {
+        font-size: 2rem;
+        padding: 15px;
+        color: white;
+        background: #ff4081;
+        border-radius: 15px;
+        text-shadow: 3px 3px 0px black;
+        box-shadow: 3px 3px 0px #000;
+      }
+
+      th,
+      td {
+        padding: 18px;
+        text-align: center;
+        border: 5px dashed #000;
+        font-size: 1.4rem;
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        position: relative;
+      }
+
+      th {
+        background: #ffcc80;
+        color: #000;
+        text-shadow: 2px 2px 0px black;
+      }
+
+      td {
+        background: #ffee58;
+        transition: all 0.3s ease-in-out;
+      }
+
+      td:hover {
+        background: #ff80ab;
+        color: white;
+        transform: scale(1.1) rotate(-3deg);
+        box-shadow: 0px 0px 15px rgba(255, 0, 128, 0.6);
+      }
+
+      tr:nth-child(even) td {
+        background: #f8bbd0;
+      }
+
+      tr:nth-child(even) td:hover {
+        background: #ff4081;
+      }
+
+      /* Neon Glow Effect */
+      td::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 120%;
+        height: 120%;
+        background: rgba(255, 0, 128, 0.2);
+        transform: translate(-50%, -50%);
+        border-radius: 20px;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+      }
+
+      td:hover::before {
+        opacity: 1;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        table {
+          width: 90%;
+        }
+        caption {
+          font-size: 1.5rem;
+        }
+        th,
+        td {
+          padding: 10px;
+          font-size: 1.1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="table-container">
+      <table id="cartoonTable">
+        <caption>
+          Cartoon Table
+        </caption>
+        <tr>
+          <th colspan="2">Company</th>
+          <th>Contact</th>
+        </tr>
+        <tr>
+          <td rowspan="2" style="background: #64b5f6; color: white">
+            Alfreds Futterkiste
+          </td>
+          <td>Maria Anders</td>
+          <td>Germany</td>
+        </tr>
+        <tr>
+          <td rowspan="2" style="background: #81c784; color: white">
+            Centro comercial Moctezuma
+          </td>
+          <td>Francisco Chang</td>
+        </tr>
+        <tr>
+          <td>Centro comercial Moctezuma</td>
+          <td>Francisco Chang</td>
+        </tr>
+      </table>
+    </div>
+
+    <script>
+      // Mouse Movement Effect
+      const tableContainer = document.querySelector(".table-container");
+      tableContainer.addEventListener("mousemove", (e) => {
+        const { width, height, left, top } =
+          tableContainer.getBoundingClientRect();
+        const x = (e.clientX - left) / width - 0.5;
+        const y = (e.clientY - top) / height - 0.5;
+
+        tableContainer.style.setProperty("--rotateX", `${y * -15}deg`);
+        tableContainer.style.setProperty("--rotateY", `${x * 15}deg`);
+      });
+
+      tableContainer.addEventListener("mouseleave", () => {
+        tableContainer.style.setProperty("--rotateX", "0deg");
+        tableContainer.style.setProperty("--rotateY", "0deg");
+      });
+    </script>
+  </body>
+</html>
+
+<script></script>

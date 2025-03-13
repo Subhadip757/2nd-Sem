@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      input:read-only {
+        background-color: snow;
+        color: gray;
+      }
+      button:disabled {
+        cursor: not-allowed;
+      }
+      button:enabled {
+        cursor: grab;
+      }
+      input[type="checkbox"] + span {
+        color: red;
+      }
+      input[type="chcekbox"]:checked + span {
+        color: green;
+      }
+    </style>
+  </head>
+  <body>
+    <fieldset>
+      <legend>User Name</legend>
+      <div>
+        <input type="text" placeholder="john doe" />
+        <button disabled>submit</button>
+        <button>reset</button>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>Terms of service</legend>
+      <textarea rows="4" cols="40">
+            read our terms and conditions.
+        </textarea
+      >
+      <div><input type="checkbox" /><span>I accept</span></div>
+    </fieldset>
+  </body>
+</html>

@@ -1,0 +1,136 @@
+:root {
+    --primary-color: #6c5ce7;
+    --secondary-color: #a29bfe;
+    --accent-color: #fd79a8;
+    --dark-color: #2d3436;
+    --light-color: #f8f9fa;
+    --success-color: #00b894;
+    --warning-color: #fdcb6e;
+    --danger-color: #d63031;
+    --glass-bg: rgba(255, 255, 255, 0.15);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --dark-bg: #1e1e2f;
+    --dark-text: #e0e0e0;
+  }
+  
+  body {
+    background: linear-gradient(135deg, #1d2b64, #f8cdda);
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    transition: background 0.5s ease;
+  }
+  
+  body.dark-mode {
+    background: #121212;
+    color: var(--dark-text);
+  }
+  
+  header {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+  }
+  
+  .gradient-bg {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  }
+  
+  .glass-effect {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  }
+  
+  .main-content {
+    margin-top: 2rem;
+  }
+  
+  .control-btn {
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+  }
+  
+  .station-info {
+    background: rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    border-radius: 10px;
+  }
+  
+  .station-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+    margin-right: 15px;
+    transition: transform 0.2s ease;
+  }
+  
+  .station-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  
+  .station-item:hover .station-icon {
+    transform: scale(1.1);
+  }
+  
+  .signal-bars {
+    display: flex;
+    align-items: flex-end;
+    height: 20px;
+    gap: 3px;
+  }
+  
+  .signal-bars .bar {
+    width: 5px;
+    border-radius: 3px;
+    animation: pulse 1s infinite ease-in-out;
+  }
+  
+  @keyframes pulse {
+    0% { transform: scaleY(1); }
+    50% { transform: scaleY(1.5); }
+    100% { transform: scaleY(1); }
+  }
+  
+  #visualizer {
+    display: flex;
+    height: 60px;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 2px;
+    margin-top: 1rem;
+  }
+  
+  .bar-visual {
+    width: 4px;
+    background: var(--accent-color);
+    border-radius: 2px;
+    height: 20px;
+  }
+  
+  #dark-mode-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    background: var(--dark-color);
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  

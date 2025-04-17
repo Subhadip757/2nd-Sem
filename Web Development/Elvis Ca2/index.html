@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Echo Sphere - Modern Radio Experience</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Modern Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-glass fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">
+        <i class="fas fa-broadcast-tower me-2"></i>Echo Sphere
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link active" href="#home">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#favorites">Favorites</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#recent">Recent</a>
+          </li>
+          <li class="nav-item">
+            <button id="dark-mode-toggle" class="btn btn-outline-light ms-2">
+              <i class="fas fa-moon"></i>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero-section text-center py-5">
+    <div class="container">
+      <h1 class="display-4 fw-bold text-white mb-3">Echo Sphere</h1>
+      <p class="lead text-white-50 mb-4">Discover and stream radio stations from around the world</p>
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <div class="search-bar">
+            <div class="input-group">
+              <input type="text" id="station-search" class="form-control form-control-lg" 
+                     placeholder="Search stations...">
+              <button class="btn btn-primary btn-lg" id="search-btn">
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container-fluid px-0">
+    <div class="row mx-0">
+      <div class="col-lg-8 mx-auto">
+        <!-- Player Section -->
+        <div class="player-section mb-5">
+          <div class="player-container p-4 glass-effect">
+            <div class="row align-items-center">
+              <div class="col-md-4">
+                <div class="station-artwork">
+                  <img id="station-image" src="default-station.png" alt="Station" 
+                       class="img-fluid rounded-circle shadow">
+                </div>
+              </div>
+              <div class="col-md-8">
+                <div class="player-controls">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div id="now-playing" class="h5 mb-0">Select a station to begin</div>
+                    <div class="volume-control">
+                      <div class="d-flex align-items-center">
+                        <i class="fas fa-volume-down me-2"></i>
+                        <input type="range" class="form-range" id="volume" 
+                               min="0" max="1" step="0.1" value="0.7">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="progress mb-3" style="height: 8px;">
+                    <div id="buffer-bar" class="progress-bar progress-bar-striped"></div>
+                    <div id="progress-bar" class="progress-bar"></div>
+                  </div>
+                  <div class="d-flex justify-content-center gap-3">
+                    <button id="play-btn" class="btn btn-lg btn-primary rounded-circle">
+                      <i class="fas fa-play"></i>
+                    </button>
+                    <button id="stop-btn" class="btn btn-lg btn-outline-danger rounded-circle">
+                      <i class="fas fa-stop"></i>
+                    </button>
+                    <button id="favorite-btn" class="btn btn-lg btn-outline-warning rounded-circle">
+                      <i class="far fa-star"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="visualizer" class="mt-4"></div>
+          </div>
+        </div>
+
+        <!-- Content Sections -->
+        <div class="row g-4">
+          <!-- Stations List -->
+          <div class="col-md-6">
+            <div class="stations-section glass-effect p-4">
+              <h4 class="section-title mb-4">
+                <i class="fas fa-broadcast-tower me-2"></i>Browse Stations
+              </h4>
+              <div class="filters mb-4">
+                <select id="country-filter" class="form-select mb-3">
+                  <option value="all">All Countries</option>
+                </select>
+                <select id="genre-filter" class="form-select">
+                  <option value="all">All Genres</option>
+                </select>
+              </div>
+              <div id="stations-list" class="stations-scrollable"></div>
+            </div>
+          </div>
+
+          <!-- Favorites and Recent -->
+          <div class="col-md-6">
+            <div class="favorites-section glass-effect p-4 mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="section-title mb-0">
+                  <i class="fas fa-star me-2"></i>Favorites
+                </h4>
+                <button id="clear-favorites" class="btn btn-sm btn-outline-danger">
+                  Clear All
+                </button>
+              </div>
+              <div id="favorites-list" class="favorites-scrollable"></div>
+            </div>
+
+            <div class="recent-section glass-effect p-4">
+              <h4 class="section-title mb-3">
+                <i class="fas fa-history me-2"></i>Recently Played
+              </h4>
+              <div id="recently-played-list" class="recent-scrollable"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer mt-5 py-4 text-center">
+    <div class="container">
+      <p class="mb-0">
+        © 2025 Echo Sphere | Made with <i class="fas fa-heart text-danger"></i> for music lovers
+      </p>
+    </div>
+  </footer>
+
+  <!-- Audio Player -->
+  <audio id="radio-player"></audio>
+
+  <!-- Bootstrap Toast Container -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

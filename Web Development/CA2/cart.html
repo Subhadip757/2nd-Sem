@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shopping Cart - ShopEasy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .quantity-input {
+        width: 60px;
+        text-align: center;
+      }
+      .cart-item {
+        transition: all 0.3s ease;
+      }
+      .cart-item:hover {
+        background-color: #f8f9fa;
+      }
+      .remove-item {
+        transition: all 0.2s ease;
+      }
+      .remove-item:hover {
+        color: #dc3545 !important;
+      }
+      .cart-summary {
+        position: sticky;
+        top: 100px;
+      }
+      .promo-code {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+      }
+      .promo-code.show {
+        max-height: 200px;
+      }
+      .promo-code input.is-invalid {
+        border-color: #dc3545;
+        animation: shake 0.5s;
+      }
+      .promo-code input.is-valid {
+        border-color: #198754;
+      }
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+      }
+      #promoCodeBadge {
+        font-size: 0.8rem;
+        padding: 0.4em 0.8em;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky-top">
+      <nav class="navbar">
+        <div class="container">
+          <a class="navbar-brand fw-bold" href="index.html">ShopEasy</a>
+          <div class="d-flex align-items-center gap-3">
+            <a href="cart.html" class="text-dark position-relative">
+              <i class="fa-solid fa-cart-shopping fs-5"></i>
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-count">
+                0
+              </span>
+            </a>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Cart Section -->
+    <section class="py-5">
+      <div class="container">
+        <h2 class="mb-4">Your Shopping Cart</h2>
+        
+        <!-- Cart Content -->
+        <div class="row">
+          <!-- Cart Items -->
+          <div class="col-lg-8">
+            <div class="card shadow-sm">
+              <div class="card-body" id="cartItems">
+                <!-- Empty Cart Message -->
+                <div id="emptyCart" class="text-center py-5">
+                  <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                  <h4>Your cart is empty</h4>
+                  <p class="text-muted">Looks like you haven't added any items yet.</p>
+                  <a href="products.html" class="btn btn-danger">Continue Shopping</a>
+                </div>
+                
+                <!-- Cart Items will be loaded here -->
+              </div>
+            </div>
+
+            <!-- Recently Viewed Items -->
+            <div class="mt-4">
+              <h4>Recently Viewed</h4>
+              <div class="row g-3" id="recentlyViewed">
+                <!-- Recently viewed items will be loaded here -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Cart Summary -->
+          <div class="col-lg-4">
+            <div class="card shadow-sm cart-summary">
+              <div class="card-body">
+                <h5 class="card-title mb-4">Order Summary</h5>
+                
+                <!-- Price Details -->
+                <div class="d-flex justify-content-between mb-2">
+                  <span>Subtotal</span>
+                  <span id="subtotal">$0.00</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span>Shipping</span>
+                  <span id="shipping">$0.00</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span>Tax (10%)</span>
+                  <span id="tax">$0.00</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span>Discount</span>
+                  <span id="discount" class="text-danger">-$0.00</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between mb-4">
+                  <strong>Total</strong>
+                  <strong id="total">$0.00</strong>
+                </div>
+
+                <!-- Promo Code -->
+                <div class="mb-3">
+                  <button class="btn btn-outline-secondary w-100 mb-2" 
+                          onclick="togglePromoCode()">
+                    <i class="fas fa-tag me-2"></i>Add Promo Code
+                  </button>
+                  <div class="promo-code" id="promoCodeSection">
+                    <div class="input-group mt-2">
+                      <input type="text" 
+                             class="form-control" 
+                             id="promoCode" 
+                             placeholder="Enter promo code"
+                             autocomplete="off">
+                      <button class="btn btn-outline-danger" 
+                              id="applyPromoButton"
+                              onclick="applyPromoCode()">
+                        Apply
+                      </button>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                      <small class="text-muted">Available codes: SAVE20, SAVE10, WELCOME</small>
+                      <span class="badge bg-success" id="promoCodeBadge"></span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Checkout Button -->
+                <button class="btn btn-danger w-100 mb-3" 
+                        id="checkoutBtn" onclick="proceedToCheckout()" disabled>
+                  Proceed to Checkout
+                </button>
+
+                <!-- Save for Later -->
+                <button class="btn btn-outline-secondary w-100" 
+                        onclick="saveCartForLater()" id="saveForLaterBtn" disabled>
+                  Save Cart for Later
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div id="cartToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <strong class="me-auto">ShopEasy</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body"></div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-4">
+            <h5>ShopEasy</h5>
+            <p class="text-secondary">Your one-stop shop for all your needs</p>
+            <div class="social-links">
+              <a href="#" class="text-white me-2"><i class="fab fa-facebook"></i></a>
+              <a href="#" class="text-white me-2"><i class="fab fa-twitter"></i></a>
+              <a href="#" class="text-white me-2"><i class="fab fa-instagram"></i></a>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <h5>Quick Links</h5>
+            <ul class="list-unstyled">
+              <li><a href="index.html" class="text-secondary">Home</a></li>
+              <li><a href="products.html" class="text-secondary">Products</a></li>
+              <li><a href="about.html" class="text-secondary">About Us</a></li>
+              <li><a href="contact.html" class="text-secondary">Contact</a></li>
+            </ul>
+          </div>
+          <div class="col-md-4">
+            <h5>Contact Info</h5>
+            <ul class="list-unstyled text-secondary">
+              <li><i class="fas fa-map-marker-alt me-2"></i> 123 Shopping St, City</li>
+              <li><i class="fas fa-phone me-2"></i> +1 234 567 8900</li>
+              <li><i class="fas fa-envelope me-2"></i> support@shopeasy.com</li>
+            </ul>
+          </div>
+        </div>
+        <div class="text-center mt-4 text-secondary small">
+          &copy; 2024 ShopEasy. All rights reserved.
+        </div>
+      </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Global variables
+      let cartItems = [];
+      let promoApplied = false;
+      const SHIPPING_THRESHOLD = 50; // Free shipping above $50
+      const BASE_SHIPPING = 5.99;
+      const TAX_RATE = 0.10;
+      const MAX_QUANTITY = 10;
+      const PROMO_CODES = {
+        'SAVE20': { discount: 0.20, description: '20% off' },
+        'SAVE10': { discount: 0.10, description: '10% off' },
+        'WELCOME': { discount: 0.15, description: '15% off for new customers' }
+      };
+
+      // Initialize when page loads
+      document.addEventListener('DOMContentLoaded', () => {
+        initializeCart();
+        loadRecentlyViewed();
+      });
+
+      function initializeCart() {
+        try {
+          loadCart();
+          updateCartCount();
+          setupCartEventListeners();
+        } catch (error) {
+          console.error('Cart initialization failed:', error);
+          showErrorToast('Failed to initialize cart');
+        }
+      }
+
+      // Load cart with improved error handling and loading state
+      async function loadCart() {
+        const cartContainer = document.getElementById('cartItems');
+        const emptyCart = document.getElementById('emptyCart');
+        
+        try {
+          // Show loading state
+          cartContainer.innerHTML = `
+            <div class="text-center py-4">
+              <div class="spinner-border text-danger" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          `;
+
+          const cart = JSON.parse(localStorage.getItem('cart')) || [];
+          
+          if (!Array.isArray(cart)) {
+            throw new Error('Invalid cart data');
+          }
+
+          if (cart.length === 0) {
+            showEmptyCart();
+            return;
+          }
+
+          let html = '';
+          let subtotal = 0;
+          const loadingPromises = [];
+
+          // Load all products in parallel
+          for (const item of cart) {
+            if (!item.id || !item.quantity) continue;
+            
+            const promise = fetch(`https://dummyjson.com/products/${item.id}`)
+              .then(response => {
+                if (!response.ok) throw new Error(`Product ${item.id} not found`);
+                return response.json();
+              })
+              .then(product => {
+                const itemTotal = product.price * item.quantity;
+                subtotal += itemTotal;
+                
+                return `
+                  <div class="cart-item mb-3 border rounded p-3" data-id="${product.id}">
+                    <div class="row align-items-center">
+                      <div class="col-md-2">
+                        <img src="${product.thumbnail}" 
+                             class="img-fluid rounded" 
+                             alt="${product.title}"
+                             onerror="this.src='placeholder.jpg'">
+                      </div>
+                      <div class="col-md-4">
+                        <h6 class="mb-1">${product.title}</h6>
+                        <small class="text-muted d-block">${product.brand}</small>
+                        <p class="text-danger mb-0">$${product.price.toFixed(2)}</p>
+                      </div>
+                      <div class="col-md-3">
+                        <div class="quantity-control">
+                          <div class="input-group input-group-sm">
+                            <button class="btn btn-outline-secondary" 
+                                    type="button"
+                                    onclick="updateQuantity(${product.id}, ${item.quantity - 1})"
+                                    ${item.quantity <= 1 ? 'disabled' : ''}>
+                              <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="number" 
+                                   class="form-control text-center quantity-input" 
+                                   value="${item.quantity}"
+                                   min="1" 
+                                   max="${MAX_QUANTITY}"
+                                   data-product-id="${product.id}"
+                                   onchange="handleQuantityChange(event)">
+                            <button class="btn btn-outline-secondary" 
+                                    type="button"
+                                    onclick="updateQuantity(${product.id}, ${item.quantity + 1})"
+                                    ${item.quantity >= MAX_QUANTITY ? 'disabled' : ''}>
+                              <i class="fas fa-plus"></i>
+                            </button>
+                          </div>
+                          <small class="text-muted d-block mt-1">Max: ${MAX_QUANTITY}</small>
+                        </div>
+                      </div>
+                      <div class="col-md-2 text-end">
+                        <span class="fw-bold">$${itemTotal.toFixed(2)}</span>
+                      </div>
+                      <div class="col-md-1 text-end">
+                        <button class="btn btn-link text-danger p-0" 
+                                onclick="confirmRemoveItem(${product.id})">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              })
+              .catch(error => {
+                console.error(`Error loading product ${item.id}:`, error);
+                return '';
+              });
+
+            loadingPromises.push(promise);
+          }
+
+          // Wait for all products to load
+          const cartItems = await Promise.all(loadingPromises);
+          html = cartItems.join('');
+
+          if (html) {
+            emptyCart.style.display = 'none';
+            cartContainer.innerHTML = html;
+            document.getElementById('checkoutBtn').disabled = false;
+            document.getElementById('saveForLaterBtn').disabled = false;
+            updateCartSummary(subtotal);
+          } else {
+            showEmptyCart();
+          }
+
+        } catch (error) {
+          console.error('Error loading cart:', error);
+          showErrorToast('Failed to load cart');
+          showEmptyCart();
+        }
+      }
+
+      // Handle quantity change with debouncing
+      let quantityUpdateTimeout;
+      function handleQuantityChange(event) {
+        clearTimeout(quantityUpdateTimeout);
+        
+        const input = event.target;
+        const productId = parseInt(input.dataset.productId);
+        let value = parseInt(input.value);
+
+        // Validate input
+        if (isNaN(value) || value < 1) {
+          value = 1;
+          input.value = 1;
+        } else if (value > MAX_QUANTITY) {
+          value = MAX_QUANTITY;
+          input.value = MAX_QUANTITY;
+        }
+
+        // Debounce the update
+        quantityUpdateTimeout = setTimeout(() => {
+          updateQuantity(productId, value);
+        }, 500);
+      }
+
+      // Update quantity with optimistic update
+      function updateQuantity(productId, newQuantity) {
+        if (newQuantity < 1 || newQuantity > MAX_QUANTITY) return;
+
+        try {
+          const cart = JSON.parse(localStorage.getItem('cart')) || [];
+          const itemIndex = cart.findIndex(item => item.id === productId);
+          
+          if (itemIndex !== -1) {
+            // Optimistic update
+            const itemElement = document.querySelector(`[data-id="${productId}"]`);
+            const quantityInput = itemElement?.querySelector('.quantity-input');
+            const oldQuantity = cart[itemIndex].quantity;
+            
+            cart[itemIndex].quantity = newQuantity;
+            localStorage.setItem('cart', JSON.stringify(cart));
+            
+            if (quantityInput) {
+              quantityInput.value = newQuantity;
+            }
+
+            // Visual feedback
+            if (itemElement) {
+              itemElement.style.backgroundColor = '#fff3cd';
+              setTimeout(() => {
+                itemElement.style.backgroundColor = '';
+              }, 300);
+            }
+
+            // Update UI
+            updateCartCount();
+            recalculateCartTotals();
+            
+            // Show feedback for max quantity
+            if (newQuantity === MAX_QUANTITY) {
+              showInfoToast(`Maximum quantity (${MAX_QUANTITY}) reached`);
+            }
+          }
+        } catch (error) {
+          console.error('Error updating quantity:', error);
+          showErrorToast('Failed to update quantity');
+        }
+      }
+
+      // Recalculate cart totals
+      function recalculateCartTotals() {
+        try {
+          const cart = JSON.parse(localStorage.getItem('cart')) || [];
+          let subtotal = 0;
+
+          cart.forEach(item => {
+            const priceElement = document.querySelector(`[data-id="${item.id}"] .text-danger`);
+            if (priceElement) {
+              const price = parseFloat(priceElement.textContent.replace('$', ''));
+              subtotal += price * item.quantity;
+            }
+          });
+
+          updateCartSummary(subtotal);
+        } catch (error) {
+          console.error('Error recalculating totals:', error);
+        }
+      }
+
+      // Show empty cart state
+      function showEmptyCart() {
+        const emptyCart = document.getElementById('emptyCart');
+        const cartContainer = document.getElementById('cartItems');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        
+        emptyCart.style.display = 'block';
+        cartContainer.innerHTML = '';
+        checkoutBtn.disabled = true;
+        updateCartSummary(0);
+      }
+
+      // Confirm remove item
+      function confirmRemoveItem(productId) {
+        if (confirm('Are you sure you want to remove this item from your cart?')) {
+          removeItem(productId);
+        }
+      }
+
+      // Remove item with animation
+      function removeItem(productId) {
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const itemElement = document.querySelector(`[data-id="${productId}"]`);
+        
+        if (itemElement) {
+          itemElement.style.transition = 'all 0.3s ease';
+          itemElement.style.opacity = '0';
+          itemElement.style.transform = 'translateX(20px)';
+          
+          setTimeout(() => {
+            const newCart = cart.filter(item => item.id !== productId);
+            localStorage.setItem('cart', JSON.stringify(newCart));
+            loadCart();
+            updateCartCount();
+            showSuccessToast('Item removed from cart');
+          }, 300);
+        }
+      }
+
+      // Update cart summary with animations
+      function updateCartSummary(subtotal) {
+        try {
+          const shipping = subtotal >= SHIPPING_THRESHOLD ? 0 : BASE_SHIPPING;
+          const tax = subtotal * TAX_RATE;
+          
+          // Calculate discount if promo code is applied
+          let discount = 0;
+          const appliedPromo = JSON.parse(localStorage.getItem('appliedPromoCode'));
+          if (appliedPromo && PROMO_CODES[appliedPromo]) {
+            discount = subtotal * PROMO_CODES[appliedPromo].discount;
+            document.getElementById('discount').textContent = `-$${discount.toFixed(2)}`;
+            document.getElementById('promoCodeBadge').textContent = 
+              `${PROMO_CODES[appliedPromo].description} applied`;
+          } else {
+            document.getElementById('discount').textContent = '-$0.00';
+            document.getElementById('promoCodeBadge').textContent = '';
+          }
+
+          const total = subtotal + shipping + tax - discount;
+
+          // Animate value updates
+          animateValue('subtotal', subtotal);
+          document.getElementById('shipping').textContent = 
+            shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`;
+          animateValue('tax', tax);
+          animateValue('total', total);
+
+          // Update promo code section UI
+          updatePromoCodeUI(appliedPromo);
+
+          // Show free shipping message
+          if (subtotal > 0 && subtotal < SHIPPING_THRESHOLD) {
+            const remaining = SHIPPING_THRESHOLD - subtotal;
+            showInfoToast(`Add $${remaining.toFixed(2)} more for free shipping!`);
+          }
+        } catch (error) {
+          console.error('Error updating cart summary:', error);
+          showErrorToast('Failed to update cart summary');
+        }
+      }
+
+      // Animate price changes
+      function animateValue(elementId, value) {
+        const element = document.getElementById(elementId);
+        const start = parseFloat(element.textContent.replace('$', '')) || 0;
+        const duration = 500;
+        const startTime = performance.now();
+
+        function update(currentTime) {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+
+          const current = start + (value - start) * progress;
+          element.textContent = `$${current.toFixed(2)}`;
+
+          if (progress < 1) {
+            requestAnimationFrame(update);
+          }
+        }
+
+        requestAnimationFrame(update);
+      }
+
+      // Toast notifications
+      function showSuccessToast(message) {
+        showToast(message, 'success');
+      }
+
+      function showErrorToast(message) {
+        showToast(message, 'danger');
+      }
+
+      function showInfoToast(message) {
+        showToast(message, 'info');
+      }
+
+      function showToast(message, type = 'info') {
+        const toast = document.getElementById('cartToast');
+        const toastBody = toast.querySelector('.toast-body');
+        
+        toast.classList.remove('bg-success', 'bg-danger', 'bg-info');
+        toast.classList.add(`bg-${type}`, 'text-white');
+        toastBody.textContent = message;
+        
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+      }
+
+      // Update cart count badge
+      function updateCartCount() {
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const count = cart.reduce((total, item) => total + item.quantity, 0);
+        const badge = document.querySelector('.cart-count');
+        
+        if (badge) {
+          badge.textContent = count;
+          badge.style.display = count > 0 ? 'block' : 'none';
+          
+          // Animate badge update
+          badge.classList.add('scale-up');
+          setTimeout(() => badge.classList.remove('scale-up'), 300);
+        }
+      }
+
+      // Toggle promo code section
+      function togglePromoCode() {
+        const promoSection = document.getElementById('promoCodeSection');
+        promoSection.classList.toggle('show');
+        
+        // Reset input when hiding
+        if (!promoSection.classList.contains('show')) {
+          document.getElementById('promoCode').value = '';
+        }
+      }
+
+      // Apply promo code
+      function applyPromoCode() {
+        const promoInput = document.getElementById('promoCode');
+        const code = promoInput.value.trim().toUpperCase();
+        const appliedPromo = JSON.parse(localStorage.getItem('appliedPromoCode'));
+
+        try {
+          // If a promo is already applied, remove it
+          if (appliedPromo) {
+            localStorage.removeItem('appliedPromoCode');
+            promoInput.value = '';
+            promoInput.disabled = false;
+            recalculateCartTotals();
+            showSuccessToast('Promo code removed');
+            return;
+          }
+
+          // Validate the promo code
+          if (!code) {
+            showErrorToast('Please enter a promo code');
+            return;
+          }
+
+          // Check if promo code exists
+          if (!PROMO_CODES[code]) {
+            showErrorToast('Invalid promo code');
+            promoInput.classList.add('is-invalid');
+            setTimeout(() => promoInput.classList.remove('is-invalid'), 2000);
+            return;
+          }
+
+          // Apply the promo code
+          localStorage.setItem('appliedPromoCode', JSON.stringify(code));
+          showSuccessToast(`${PROMO_CODES[code].description} applied successfully!`);
+          promoInput.classList.add('is-valid');
+          setTimeout(() => promoInput.classList.remove('is-valid'), 2000);
+
+          // Recalculate totals with new discount
+          recalculateCartTotals();
+        } catch (error) {
+          console.error('Error applying promo code:', error);
+          showErrorToast('Failed to apply promo code');
+        }
+      }
+
+      // Improved promo code section UI
+      function updatePromoCodeUI(appliedCode) {
+        const promoSection = document.getElementById('promoCodeSection');
+        const promoInput = document.getElementById('promoCode');
+        const applyButton = document.getElementById('applyPromoButton');
+        
+        if (appliedCode) {
+          promoInput.disabled = true;
+          applyButton.textContent = 'Remove';
+          applyButton.classList.replace('btn-outline-danger', 'btn-outline-secondary');
+        } else {
+          promoInput.disabled = false;
+          applyButton.textContent = 'Apply';
+          applyButton.classList.replace('btn-outline-secondary', 'btn-outline-danger');
+        }
+      }
+
+      // Save cart for later
+      function saveCartForLater() {
+        localStorage.setItem('savedCart', localStorage.getItem('cart'));
+        showToast('Cart saved for later');
+      }
+
+      // Load recently viewed items
+      function loadRecentlyViewed() {
+        const recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewed')) || [];
+        const container = document.getElementById('recentlyViewed');
+
+        if (recentlyViewed.length === 0) {
+          container.innerHTML = '<p class="text-muted">No recently viewed items</p>';
+          return;
+        }
+
+        const html = recentlyViewed.map(product => `
+          <div class="col-md-3">
+            <div class="card h-100">
+              <img src="${product.thumbnail}" class="card-img-top p-2" 
+                   alt="${product.title}" style="height: 150px; object-fit: contain;">
+              <div class="card-body">
+                <h6 class="card-title">${product.title}</h6>
+                <p class="card-text text-danger">$${product.price}</p>
+                <button onclick="addToCart(${product.id})" 
+                        class="btn btn-sm btn-outline-danger w-100">
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+        container.innerHTML = html;
+      }
+
+      // Proceed to checkout
+      function proceedToCheckout() {
+        // Save cart data for checkout page
+        localStorage.setItem('checkoutCart', JSON.stringify({
+          items: cartItems,
+          summary: {
+            subtotal: document.getElementById('subtotal').textContent,
+            shipping: document.getElementById('shipping').textContent,
+            tax: document.getElementById('tax').textContent,
+            discount: document.getElementById('discount').textContent,
+            total: document.getElementById('total').textContent
+          }
+        }));
+        
+        // Redirect to checkout page
+        window.location.href = 'checkout.html';
+      }
+
+      // Setup cart event listeners
+      function setupCartEventListeners() {
+        // Prevent form submission on quantity input
+        document.addEventListener('keydown', (e) => {
+          if (e.target.classList.contains('quantity-input') && e.key === 'Enter') {
+            e.preventDefault();
+            e.target.blur();
+          }
+        });
+
+        // Save cart state before page unload
+        window.addEventListener('beforeunload', () => {
+          try {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            if (cart.length > 0) {
+              localStorage.setItem('savedCart', JSON.stringify(cart));
+            }
+          } catch (error) {
+            console.error('Error saving cart:', error);
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

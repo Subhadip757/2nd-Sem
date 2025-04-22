@@ -10,6 +10,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class StudentManagementSystem extends JFrame {
+    private LoginPage loginPage;
+    private DashboardPage dashboardPage;
+    private CRUDPage crudPage;
     private final StudentDataManager dataManager;
     private DefaultTableModel tableModel;
     private JTable table;
@@ -20,8 +23,31 @@ public class StudentManagementSystem extends JFrame {
 
     public StudentManagementSystem() {
         dataManager = new StudentDataManager();
-        initializeUI();
-        loadStudentsToTable();
+        showLoginPage();
+    }
+
+    public void showLoginPage() {
+        if (loginPage != null) {
+            loginPage.dispose();
+        }
+        loginPage = new LoginPage(this);
+        loginPage.setVisible(true);
+    }
+
+    public void showDashboard() {
+        if (dashboardPage != null) {
+            dashboardPage.dispose();
+        }
+        dashboardPage = new DashboardPage(this);
+        dashboardPage.setVisible(true);
+    }
+
+    public void showCRUDPage() {
+        if (crudPage != null) {
+            crudPage.dispose();
+        }
+        crudPage = new CRUDPage(this);
+        crudPage.setVisible(true);
     }
 
     private void initializeUI() {
@@ -424,8 +450,7 @@ public class StudentManagementSystem extends JFrame {
             // Start application
             SwingUtilities.invokeLater(() -> {
                 try {
-                    StudentManagementSystem system = new StudentManagementSystem();
-                    system.setVisible(true);
+                    new StudentManagementSystem();
                 } catch (Exception e) {
                     JOptionPane.showMessageDialog(null,
                             "Error starting application: " + e.getMessage(),

@@ -289,71 +289,25 @@
 
         function saveOrderToProfile(orderDetails, orderNumber) {
             try {
-                // Get existing profile or create new one
-                let profile = JSON.parse(localStorage.getItem('userProfile')) || {
-                    orders: [],
-                    addresses: [],
-                    wishlist: []
-                };
+                const profile = JSON.parse(localStorage.getItem('userProfile')) || {};
+                if (!profile.orders) profile.orders = [];
 
-                // Create new order object with all necessary details
-                const newOrder = {
+                profile.orders.push({
                     orderId: orderNumber,
                     date: new Date().toISOString(),
-                    items: orderDetails.items.map(item => ({
-                        id: item.id,
-                        name: item.name,
-                        price: item.price,
-                        quantity: item.quantity,
-                        image: item.image
-                    })),
+                    items: orderDetails.items,
                     total: orderDetails.total,
-                    subtotal: orderDetails.subtotal,
-                    shipping: orderDetails.shipping,
-                    tax: orderDetails.tax,
-                    discount: orderDetails.discount,
                     status: 'pending',
                     shippingAddress: orderDetails.shippingAddress,
                     paymentMethod: orderDetails.paymentMethod
-                };
+                });
 
-                // Add the new order to the profile
-                profile.orders.unshift(newOrder); // Add to beginning of array
-
-                // If this is the first order, update profile details from shipping info
-                if (!profile.firstName) {
-                    profile.firstName = orderDetails.shippingAddress.firstName;
-                    profile.lastName = orderDetails.shippingAddress.lastName;
-                    profile.email = orderDetails.shippingAddress.email;
-                    profile.phone = orderDetails.shippingAddress.phone;
-                }
-
-                // Add shipping address to saved addresses if it's new
-                const newAddress = {
-                    label: 'Shipping Address',
-                    ...orderDetails.shippingAddress
-                };
-
-                // Check if address already exists
-                const addressExists = profile.addresses.some(addr => 
-                    addr.street === newAddress.street && 
-                    addr.zip === newAddress.zip
-                );
-
-                if (!addressExists) {
-                    profile.addresses.push(newAddress);
-                }
-
-                // Save updated profile
                 localStorage.setItem('userProfile', JSON.stringify(profile));
-
+                
                 // Clear the last order from localStorage
                 localStorage.removeItem('lastOrder');
-                
-                console.log('Order saved to profile successfully');
             } catch (error) {
                 console.error('Error saving order to profile:', error);
-                showToast('error', 'Failed to save order to profile');
             }
         }
     </script>

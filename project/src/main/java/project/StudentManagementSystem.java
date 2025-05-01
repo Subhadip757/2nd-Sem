@@ -50,6 +50,11 @@ public class StudentManagementSystem extends JFrame {
         crudPage.setVisible(true);
     }
 
+    public void showCoursePage() {
+        CoursePage coursePage = new CoursePage(this);
+        coursePage.setVisible(true);
+    }
+
     private void initializeUI() {
         setTitle("Student Management System with MongoDB");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

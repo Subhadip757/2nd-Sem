@@ -55,22 +55,6 @@ public class StudentManagementSystem extends JFrame {
         coursePage.setVisible(true);
     }
 
-<<<<<<< HEAD
-    public void showCalendarPage() {
-        CalendarPage calendarPage = new CalendarPage(this);
-        calendarPage.setVisible(true);
-    }
-
-    public void showMarksPage() {
-        MarksPage marksPage = new MarksPage(this);
-        marksPage.setVisible(true);
-    }
-
-    public void showResultPage() {
-        ResultPage resultPage = new ResultPage(this);
-        resultPage.setVisible(true);
-    }
-
     public void showLeaderboardPage() {
         try {
             LeaderboardPage leaderboardPage = new LeaderboardPage(this);
@@ -86,8 +70,21 @@ public class StudentManagementSystem extends JFrame {
         }
     }
 
-=======
->>>>>>> origin/main
+    public void showCalendarPage() {
+        CalendarPage calendarPage = new CalendarPage(this);
+        calendarPage.setVisible(true);
+    }
+
+    public void showMarksPage() {
+        MarksPage marksPage = new MarksPage(this);
+        marksPage.setVisible(true);
+    }
+
+    public void showResultPage() {
+        ResultPage resultPage = new ResultPage(this);
+        resultPage.setVisible(true);
+    }
+
     private void initializeUI() {
         setTitle("Student Management System with MongoDB");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

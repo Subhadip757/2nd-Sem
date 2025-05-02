@@ -132,22 +132,33 @@ public class DashboardPage extends JFrame {
 
     private JPanel createSidebar() {
         JPanel sidebar = new JPanel();
+<<<<<<< HEAD
         sidebar.setPreferredSize(new Dimension(250, 0)); // Restored original width
+=======
+        sidebar.setPreferredSize(new Dimension(250, 0));
+>>>>>>> origin/main
         sidebar.setBackground(CARD_COLOR);
         sidebar.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(226, 232, 240)),
                 BorderFactory.createEmptyBorder(20, 0, 20, 0)));
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
 
+<<<<<<< HEAD
         // Add navigation buttons
+=======
+>>>>>>> origin/main
         addSidebarItem(sidebar, "📊 Dashboard", e -> {
             // Current page, no action needed
         }, true);
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
         addSidebarItem(sidebar, "👥 Student Records", e -> {
             mainSystem.showCRUDPage();
             dispose();
         }, false);
+<<<<<<< HEAD
 
         addSidebarItem(sidebar, "📚 Courses", e -> {
             mainSystem.showCoursePage();
@@ -172,6 +183,16 @@ public class DashboardPage extends JFrame {
         addSidebarItem(sidebar, "🏆 Leaderboard", e -> {
             mainSystem.showLeaderboardPage();
             dispose();
+=======
+        addSidebarItem(sidebar, "📚 Courses", e -> {
+            JOptionPane.showMessageDialog(this, "Courses module coming soon!");
+        }, false);
+        addSidebarItem(sidebar, "📝 Attendance", e -> {
+            JOptionPane.showMessageDialog(this, "Attendance module coming soon!");
+        }, false);
+        addSidebarItem(sidebar, "📈 Reports", e -> {
+            JOptionPane.showMessageDialog(this, "Reports module coming soon!");
+>>>>>>> origin/main
         }, false);
 
         return sidebar;
@@ -204,7 +225,11 @@ public class DashboardPage extends JFrame {
         JPanel mainContent = new JPanel(new BorderLayout(20, 20));
         mainContent.setBackground(BACKGROUND_COLOR);
 
+<<<<<<< HEAD
         // Welcome Section with stats
+=======
+        // Welcome Section
+>>>>>>> origin/main
         JPanel welcomeSection = new JPanel(new BorderLayout());
         welcomeSection.setBackground(BACKGROUND_COLOR);
         JLabel dashboardTitle = new JLabel("Dashboard Overview");
@@ -217,6 +242,7 @@ public class DashboardPage extends JFrame {
         statsPanel.setBackground(BACKGROUND_COLOR);
         statsPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
 
+<<<<<<< HEAD
         // Add stats cards
         JPanel totalStudentsCard = createStatCard("👥 Total Students", "0", "Total number of enrolled students",
                 ACCENT_COLOR);
@@ -236,6 +262,35 @@ public class DashboardPage extends JFrame {
         SwingUtilities.invokeLater(() -> {
             fetchDashboardData();
         });
+=======
+        // Total Students card
+        JPanel totalStudentsCard = createStatCard("👥 Total Students", "0", "Total number of enrolled students",
+                ACCENT_COLOR);
+        statsPanel.add(totalStudentsCard);
+
+        // Average GPA card
+        JPanel averageGPACard = createStatCard("📊 Average GPA", "0.00", "Average GPA across all students",
+                PRIMARY_COLOR);
+        statsPanel.add(averageGPACard);
+
+        // Store references to labels
+        for (Component comp : totalStudentsCard.getComponents()) {
+            if (comp instanceof JLabel && ((JLabel) comp).getFont().getSize() == 28) {
+                totalStudentsLabel = (JLabel) comp;
+                break;
+            }
+        }
+
+        for (Component comp : averageGPACard.getComponents()) {
+            if (comp instanceof JLabel && ((JLabel) comp).getFont().getSize() == 28) {
+                averageGPALabel = (JLabel) comp;
+                break;
+            }
+        }
+
+        welcomeSection.add(statsPanel, BorderLayout.CENTER);
+        mainContent.add(welcomeSection, BorderLayout.NORTH);
+>>>>>>> origin/main
 
         return mainContent;
     }
@@ -260,6 +315,7 @@ public class DashboardPage extends JFrame {
         valueLabel.setForeground(accentColor);
         valueLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
+<<<<<<< HEAD
         // Store references to labels based on the title
         if (title.contains("Total Students")) {
             totalStudentsLabel = valueLabel;
@@ -267,6 +323,8 @@ public class DashboardPage extends JFrame {
             averageGPALabel = valueLabel;
         }
 
+=======
+>>>>>>> origin/main
         // Description
         JLabel descLabel = new JLabel(description);
         descLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));

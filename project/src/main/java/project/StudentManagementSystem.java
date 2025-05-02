@@ -55,6 +55,7 @@ public class StudentManagementSystem extends JFrame {
         coursePage.setVisible(true);
     }
 
+<<<<<<< HEAD
     public void showCalendarPage() {
         CalendarPage calendarPage = new CalendarPage(this);
         calendarPage.setVisible(true);
@@ -85,6 +86,8 @@ public class StudentManagementSystem extends JFrame {
         }
     }
 
+=======
+>>>>>>> origin/main
     private void initializeUI() {
         setTitle("Student Management System with MongoDB");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

@@ -1,44 +1,39 @@
-// Reverse a stack using recursion
-#include <iostream>
-#include <stack>
+#include <bits/stdc++.h>
 using namespace std;
 
-void insertAtBottom(stack<int> &s, int x)
-{
-    if (s.empty())
-    {
-        s.push(x);
-        return;
-    }
-    int num = s.top();
-    s.pop();
-    insertAtBottom(s, x);
-    s.push(num);
-}
+void dfs(int node, vector<vector<int>> &adj, int V, vector<bool> &vis, vector<int> &ans){
+    vis[node] = 1;
+    ans.push_back(node);
 
-void reverseStack(stack<int> &s)
-{
-    if (s.empty())
-    {
-        return;
+    for(auto it : adj[node]){
+        if(!vis[it]){
+            dfs(it, adj, V, vis, ans);
+        }
     }
-    int num = s.top();
-    s.pop();
-    reverseStack(s);
-    insertAtBottom(s, num);
 }
 
 int main()
 {
-    stack<int> s;
-    s.push(1);
-    s.push(2);
-    s.push(3);
-    s.push(4);
-    reverseStack(s);
-    while (!s.empty())
+    int V = 5;
+    vector<vector<int>> adj(V + 1);
+
+    for (int i = 0; i <= V; i++)
     {
-        cout << s.top() << " ";
-        s.pop();
+        int u;
+        int v;
+        cin >> u >> v;
+
+        adj[u].push_back(v);
+        adj[v].push_back(u);
     }
+    vector<int> ans;
+    vector<bool> vis(V + 1, 0);
+
+    dfs(0, adj, V, vis, ans);
+
+    for (int i = 0; i < ans.size(); i++)
+    {
+        cout << ans[i] << " ";
+    }
+    return 0;
 }

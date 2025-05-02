@@ -7,6 +7,7 @@ import com.mongodb.client.MongoDatabase;
 public class MongoDBConnection {
     private static MongoClient mongoClient;
     private static MongoDatabase database;
+    private static MongoDBConnection instance;
 
     public static MongoDatabase getDatabase() {
         if (database == null) {
@@ -41,5 +42,12 @@ public class MongoDBConnection {
                 mongoClient = null;
             }
         }
+    }
+
+    public static MongoDBConnection getInstance() {
+        if (instance == null) {
+            instance = new MongoDBConnection();
+        }
+        return instance;
     }
 }

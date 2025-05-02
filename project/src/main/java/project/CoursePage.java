@@ -8,23 +8,28 @@ import java.util.List;
 
 public class CoursePage extends JFrame {
     private StudentManagementSystem mainSystem;
+    private StudentDataManager dataManager;
+    private JTextField courseIdField;
+    private JTextField courseNameField;
     private DefaultListModel<String> courseListModel;
     private JList<String> courseList;
-    private JTextField courseNameField;
     private JButton addCourseButton, assignButton, backButton;
     private JList<String> studentJList;
     private DefaultListModel<String> studentListModel;
-    private Map<String, Set<String>> courseAssignments; // course -> set of student names
+    private Map<String, Set<Student>> courseAssignments; // Changed to use Student objects
 
     public CoursePage(StudentManagementSystem mainSystem) {
         this.mainSystem = mainSystem;
+        this.dataManager = new StudentDataManager();
         this.courseAssignments = new HashMap<>();
-        setTitle("Courses");
+
+        setTitle("Course Management");
         setSize(900, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         initializeUI();
+        loadStudentsAndCourses();
     }
 
     private void initializeUI() {
@@ -73,16 +78,21 @@ public class CoursePage extends JFrame {
 
         coursePanel.add(courseScroll, BorderLayout.CENTER);
 
-        JPanel addCoursePanel = new JPanel(new BorderLayout(8, 0));
+        JPanel addCoursePanel = new JPanel(new GridLayout(3, 2, 8, 8));
         addCoursePanel.setBackground(Color.WHITE);
+        addCoursePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        addCoursePanel.add(new JLabel("Course ID:"));
+        courseIdField = new JTextField();
+        addCoursePanel.add(courseIdField);
+
+        addCoursePanel.add(new JLabel("Course Name:"));
         courseNameField = new JTextField();
-        courseNameField.setFont(new Font("Segoe UI", Font.PLAIN, 17));
-        courseNameField.setPreferredSize(new Dimension(120, 38));
+        addCoursePanel.add(courseNameField);
+
         addCourseButton = createStyledButton("Add Course", new Color(48, 209, 88));
         addCourseButton.addActionListener(e -> addCourse());
-
-        addCoursePanel.add(courseNameField, BorderLayout.CENTER);
-        addCoursePanel.add(addCourseButton, BorderLayout.EAST);
+        addCoursePanel.add(addCourseButton);
 
         coursePanel.add(addCoursePanel, BorderLayout.SOUTH);
 
@@ -122,35 +132,82 @@ public class CoursePage extends JFrame {
                 updateStudentSelection();
             }
         });
+    }
 
-        // Load students
-        loadStudents();
+    private void loadStudentsAndCourses() {
+        try {
+            // Load students
+            studentListModel.clear();
+            List<Student> students = dataManager.getAllStudents();
+            for (Student student : students) {
+                String studentDisplay = student.getStudentId() + " - " + student.getName();
+                studentListModel.addElement(studentDisplay);
+            }
+
+            // Load courses
+            courseListModel.clear();
+            List<Course> courses = dataManager.getAllCourses();
+            for (Course course : courses) {
+                courseListModel.addElement(course.getCourseId() + " - " + course.getCourseName());
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Error loading data: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void addCourse() {
+        String courseId = courseIdField.getText().trim();
         String courseName = courseNameField.getText().trim();
-        if (courseName.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Course name cannot be empty.");
+
+        if (courseId.isEmpty() || courseName.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please fill in both Course ID and Course Name");
             return;
         }
-        if (courseListModel.contains(courseName)) {
-            JOptionPane.showMessageDialog(this, "Course already exists.");
-            return;
+
+        try {
+            // Create new course
+            Course newCourse = new Course(courseId, courseName, "");
+            dataManager.addCourse(newCourse);
+            JOptionPane.showMessageDialog(this, "Course added successfully!");
+            clearFields();
+            loadStudentsAndCourses(); // Refresh the course list
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Error adding course: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
-        courseListModel.addElement(courseName);
-        courseAssignments.put(courseName, new HashSet<>());
-        courseNameField.setText("");
     }
 
-    private void loadStudents() {
-        studentListModel.clear();
+    private void assignStudentsToCourse() {
+        String selectedCourse = courseList.getSelectedValue();
+        if (selectedCourse == null) {
+            JOptionPane.showMessageDialog(this, "Please select a course first.");
+            return;
+        }
+
+        String courseId = selectedCourse.split(" - ")[0];
+        List<String> selectedStudentIds = new ArrayList<>();
+
+        for (String studentDisplay : studentJList.getSelectedValuesList()) {
+            String studentId = studentDisplay.split(" - ")[0];
+            selectedStudentIds.add(studentId);
+        }
+
         try {
-            List<Student> students = new StudentDataManager().getAllStudents();
-            for (Student s : students) {
-                studentListModel.addElement(s.getName() + " (ID: " + s.getId() + ")");
+            for (String studentId : selectedStudentIds) {
+                dataManager.assignCourseToStudent(studentId, courseId);
             }
+            JOptionPane.showMessageDialog(this, "Students assigned to course successfully!");
+            updateStudentSelection();
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error loading students: " + e.getMessage());
+            JOptionPane.showMessageDialog(this,
+                    "Error assigning students to course: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -162,33 +219,40 @@ public class CoursePage extends JFrame {
             assignButton.setEnabled(false);
             return;
         }
+
         studentJList.setEnabled(true);
         assignButton.setEnabled(true);
 
-        // Select students already assigned to this course
-        Set<String> assigned = courseAssignments.getOrDefault(selectedCourse, new HashSet<>());
-        List<Integer> indices = new ArrayList<>();
-        for (int i = 0; i < studentListModel.size(); i++) {
-            if (assigned.contains(studentListModel.get(i))) {
-                indices.add(i);
+        try {
+            String courseId = selectedCourse.split(" - ")[0];
+            List<Student> assignedStudents = dataManager.getStudentsInCourse(courseId);
+
+            // Select students already assigned to this course
+            List<Integer> indices = new ArrayList<>();
+            for (int i = 0; i < studentListModel.size(); i++) {
+                String currentStudentId = studentListModel.get(i).split(" - ")[0];
+                for (Student assignedStudent : assignedStudents) {
+                    if (assignedStudent.getId() == Integer.parseInt(currentStudentId)) {
+                        indices.add(i);
+                        break;
+                    }
+                }
             }
+
+            int[] selectedIndices = indices.stream().mapToInt(i -> i).toArray();
+            studentJList.setSelectedIndices(selectedIndices);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Error updating student selection: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
-        int[] selectedIndices = indices.stream().mapToInt(i -> i).toArray();
-        studentJList.setSelectedIndices(selectedIndices);
     }
 
-    private void assignStudentsToCourse() {
-        String selectedCourse = courseList.getSelectedValue();
-        if (selectedCourse == null) {
-            JOptionPane.showMessageDialog(this, "Please select a course first.");
-            return;
-        }
-        Set<String> assigned = new HashSet<>();
-        for (String student : studentJList.getSelectedValuesList()) {
-            assigned.add(student);
-        }
-        courseAssignments.put(selectedCourse, assigned);
-        JOptionPane.showMessageDialog(this, "Assigned students to " + selectedCourse + "!");
+    private void clearFields() {
+        courseIdField.setText("");
+        courseNameField.setText("");
+        courseList.clearSelection();
     }
 
     private JButton createStyledButton(String text, Color color) {

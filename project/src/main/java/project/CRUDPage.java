@@ -18,7 +18,7 @@ public class CRUDPage extends JFrame {
     private StudentDataManager dataManager;
     private DefaultTableModel tableModel;
     private JTable table;
-    private JTextField idField, nameField, courseField, ageField, emailField, phoneField, addressField, gpaField;
+    private JTextField idField, nameField, ageField, emailField, phoneField, addressField;
     private JButton addButton, updateButton, deleteButton, clearButton, backButton;
 
     public CRUDPage(StudentManagementSystem mainSystem) {
@@ -122,15 +122,6 @@ public class CRUDPage extends JFrame {
 
         gbc.gridx = 0;
         gbc.gridy++;
-        JLabel courseLabel = new JLabel("Course:");
-        courseLabel.setFont(labelFont);
-        panel.add(courseLabel, gbc);
-        gbc.gridx = 1;
-        courseField = fieldSupplier.get();
-        panel.add(courseField, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy++;
         JLabel ageLabel = new JLabel("Age:");
         ageLabel.setFont(labelFont);
         panel.add(ageLabel, gbc);
@@ -165,20 +156,11 @@ public class CRUDPage extends JFrame {
         addressField = fieldSupplier.get();
         panel.add(addressField, gbc);
 
-        gbc.gridx = 0;
-        gbc.gridy++;
-        JLabel gpaLabel = new JLabel("GPA:");
-        gpaLabel.setFont(labelFont);
-        panel.add(gpaLabel, gbc);
-        gbc.gridx = 1;
-        gpaField = fieldSupplier.get();
-        panel.add(gpaField, gbc);
-
         return panel;
     }
 
     private void createTable() {
-        String[] columns = { "ID", "Name", "Course", "Age", "Email", "Phone", "Address", "GPA" };
+        String[] columns = { "ID", "Name", "Age", "Email", "Phone", "Address" };
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -259,12 +241,10 @@ public class CRUDPage extends JFrame {
         if (selectedRow >= 0) {
             idField.setText(table.getValueAt(selectedRow, 0).toString());
             nameField.setText(table.getValueAt(selectedRow, 1).toString());
-            courseField.setText(table.getValueAt(selectedRow, 2).toString());
-            ageField.setText(table.getValueAt(selectedRow, 3).toString());
-            emailField.setText(table.getValueAt(selectedRow, 4).toString());
-            phoneField.setText(table.getValueAt(selectedRow, 5).toString());
-            addressField.setText(table.getValueAt(selectedRow, 6).toString());
-            gpaField.setText(table.getValueAt(selectedRow, 7).toString());
+            ageField.setText(table.getValueAt(selectedRow, 2).toString());
+            emailField.setText(table.getValueAt(selectedRow, 3).toString());
+            phoneField.setText(table.getValueAt(selectedRow, 4).toString());
+            addressField.setText(table.getValueAt(selectedRow, 5).toString());
         }
     }
 
@@ -283,16 +263,15 @@ public class CRUDPage extends JFrame {
             Student student = new Student(
                     id,
                     nameField.getText().trim(),
-                    courseField.getText().trim(),
                     Integer.parseInt(ageField.getText()),
                     emailField.getText().trim(),
                     phoneField.getText().trim(),
                     addressField.getText().trim());
-            student.setGPA(Double.parseDouble(gpaField.getText().trim()));
 
             dataManager.addStudent(student);
-            loadStudentsToTable();
+            refreshTable();
             clearFields();
+            JOptionPane.showMessageDialog(this, "Student added successfully!");
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error adding student: " + e.getMessage());
         }
@@ -308,16 +287,15 @@ public class CRUDPage extends JFrame {
             Student student = new Student(
                     id,
                     nameField.getText().trim(),
-                    courseField.getText().trim(),
                     Integer.parseInt(ageField.getText()),
                     emailField.getText().trim(),
                     phoneField.getText().trim(),
                     addressField.getText().trim());
-            student.setGPA(Double.parseDouble(gpaField.getText().trim()));
 
             dataManager.updateStudent(student);
-            loadStudentsToTable();
+            refreshTable();
             clearFields();
+            JOptionPane.showMessageDialog(this, "Student updated successfully!");
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error updating student: " + e.getMessage());
         }
@@ -336,8 +314,9 @@ public class CRUDPage extends JFrame {
 
                 if (confirm == JOptionPane.YES_OPTION) {
                     dataManager.deleteStudent(id);
-                    loadStudentsToTable();
+                    refreshTable();
                     clearFields();
+                    JOptionPane.showMessageDialog(this, "Student deleted successfully!");
                 }
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Error deleting student: " + e.getMessage());
@@ -351,38 +330,34 @@ public class CRUDPage extends JFrame {
         try {
             if (idField.getText().trim().isEmpty() ||
                     nameField.getText().trim().isEmpty() ||
-                    courseField.getText().trim().isEmpty() ||
                     ageField.getText().trim().isEmpty() ||
                     emailField.getText().trim().isEmpty() ||
                     phoneField.getText().trim().isEmpty() ||
-                    addressField.getText().trim().isEmpty() ||
-                    gpaField.getText().trim().isEmpty()) {
+                    addressField.getText().trim().isEmpty()) {
                 JOptionPane.showMessageDialog(this, "All fields are required!");
                 return false;
             }
 
             int id = Integer.parseInt(idField.getText());
             int age = Integer.parseInt(ageField.getText());
-            double gpa = Double.parseDouble(gpaField.getText().trim());
 
-            if (age < 0 || age > 120) {
+            if (age < 0 || age > 100) {
                 JOptionPane.showMessageDialog(this, "Invalid age!");
-                return false;
-            }
-
-            if (gpa < 0 || gpa > 4.0) {
-                JOptionPane.showMessageDialog(this, "Invalid GPA!");
                 return false;
             }
 
             return true;
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Please enter valid numbers for ID, Age, and GPA");
+            JOptionPane.showMessageDialog(this, "Please enter valid numbers for ID and Age");
             return false;
         }
     }
 
     private void loadStudentsToTable() {
+        refreshTable();
+    }
+
+    private void refreshTable() {
         try {
             List<Student> students = dataManager.getAllStudents();
             tableModel.setRowCount(0);
@@ -390,28 +365,24 @@ public class CRUDPage extends JFrame {
                 tableModel.addRow(new Object[] {
                         student.getId(),
                         student.getName(),
-                        student.getCourse(),
                         student.getAge(),
                         student.getEmail(),
                         student.getPhoneNumber(),
-                        student.getAddress(),
-                        student.getGPA()
+                        student.getAddress()
                 });
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error loading students: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Error refreshing table: " + e.getMessage());
         }
     }
 
     private void clearFields() {
         idField.setText("");
         nameField.setText("");
-        courseField.setText("");
         ageField.setText("");
         emailField.setText("");
         phoneField.setText("");
         addressField.setText("");
-        gpaField.setText("");
         table.clearSelection();
     }
 

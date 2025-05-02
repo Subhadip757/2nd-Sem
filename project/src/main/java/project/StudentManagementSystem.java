@@ -55,6 +55,36 @@ public class StudentManagementSystem extends JFrame {
         coursePage.setVisible(true);
     }
 
+    public void showCalendarPage() {
+        CalendarPage calendarPage = new CalendarPage(this);
+        calendarPage.setVisible(true);
+    }
+
+    public void showMarksPage() {
+        MarksPage marksPage = new MarksPage(this);
+        marksPage.setVisible(true);
+    }
+
+    public void showResultPage() {
+        ResultPage resultPage = new ResultPage(this);
+        resultPage.setVisible(true);
+    }
+
+    public void showLeaderboardPage() {
+        try {
+            LeaderboardPage leaderboardPage = new LeaderboardPage(this);
+            leaderboardPage.setVisible(true);
+            System.out.println("Opening Leaderboard Page...");
+        } catch (Exception e) {
+            System.err.println("Error opening Leaderboard Page: " + e.getMessage());
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null,
+                    "Error opening Leaderboard: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     private void initializeUI() {
         setTitle("Student Management System with MongoDB");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -281,12 +311,12 @@ public class StudentManagementSystem extends JFrame {
             Student student = new Student(
                     id,
                     nameField.getText().trim(),
-                    courseField.getText().trim(),
                     Integer.parseInt(ageField.getText()),
                     emailField.getText().trim(),
                     phoneField.getText().trim(),
                     addressField.getText().trim());
             student.setGPA(Double.parseDouble(gpaField.getText().trim()));
+            student.setCourse(courseField.getText().trim());
 
             dataManager.addStudent(student);
             loadStudentsToTable();
@@ -330,12 +360,12 @@ public class StudentManagementSystem extends JFrame {
             Student updatedStudent = new Student(
                     id,
                     nameField.getText().trim(),
-                    courseField.getText().trim(),
                     Integer.parseInt(ageField.getText()),
                     emailField.getText().trim(),
                     phoneField.getText().trim(),
                     addressField.getText().trim());
             updatedStudent.setGPA(Double.parseDouble(gpaField.getText().trim()));
+            updatedStudent.setCourse(courseField.getText().trim());
             updatedStudent.setRegistrationDate(existingStudent.getRegistrationDate());
 
             dataManager.updateStudent(updatedStudent);

@@ -8,7 +8,7 @@ public class Student {
     private String studentId; // For string-based IDs
     private int id; // For numeric IDs
     private String name;
-    private String course;
+    private Course course;
     private int age;
     private String email;
     private String phoneNumber;
@@ -17,14 +17,9 @@ public class Student {
     private LocalDateTime registrationDate;
 
     // Constructor for CRUD operations
-    public Student(int id, String name, int age, String email, String phoneNumber, String address) {
-        this.id = id;
-        this.name = name;
-        this.age = age;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.address = address;
-        this.registrationDate = LocalDateTime.now();
+    public Student(int id, String name, int age, String email, String phoneNumber, String address, Course course) {
+        this(id, name, age, email, phoneNumber, address);
+        this.course = course;
     }
 
     // Constructor for Marks and Course operations
@@ -34,6 +29,17 @@ public class Student {
         this.name = name;
         this.email = email;
         this.phoneNumber = phone;
+    }
+
+    // Constructor for CRUD operations
+    public Student(Integer id, String name, Integer age, String email, String phoneNumber, String address) {
+        this.id = id;
+        this.name = name;
+        this.age = age;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.address = address;
+        this.registrationDate = LocalDateTime.now();
     }
 
     // Getters
@@ -49,7 +55,7 @@ public class Student {
         return name;
     }
 
-    public String getCourse() {
+    public Course getCourse() {
         return course;
     }
 
@@ -82,7 +88,7 @@ public class Student {
         this.gpa = gpa;
     }
 
-    public void setCourse(String course) {
+    public void setCourse(Course course) {
         this.course = course;
     }
 
@@ -130,11 +136,22 @@ public class Student {
                 doc.getInteger("age"),
                 doc.getString("email"),
                 doc.getString("phoneNumber"),
-                doc.getString("address"));
+                doc.getString("address"),
+                null); // Assuming course is not available in the document
         student.setGPA(doc.getDouble("gpa"));
         student.setRegistrationDate(LocalDateTime.parse(
                 doc.getString("registrationDate"),
                 DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         return student;
+    }
+
+    public Student(int id, String name, int age, String email, String phoneNumber, String address) {
+        this.id = id;
+        this.name = name;
+        this.age = age;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.address = address;
+        // Initialize other fields as needed
     }
 }

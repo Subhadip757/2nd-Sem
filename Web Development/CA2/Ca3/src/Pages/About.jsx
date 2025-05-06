@@ -7,7 +7,6 @@ import Header from '../Components/Header';
 function About() {
   return (
     <>
-<Header /> 
       <Helmet>
         <title>About Us - ShopEasy</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />

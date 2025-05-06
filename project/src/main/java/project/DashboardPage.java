@@ -167,6 +167,10 @@ public class DashboardPage extends JFrame {
             mainSystem.showLeaderboardPage();
             dispose();
         }, false);
+        addSidebarItem(sidebar, "🗓️ Attendance", e -> {
+            mainSystem.showAttendancePage();
+            dispose();
+        }, false);
 
         return sidebar;
     }

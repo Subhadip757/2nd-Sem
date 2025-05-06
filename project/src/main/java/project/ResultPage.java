@@ -82,7 +82,9 @@ public class ResultPage extends JFrame {
                 }
 
                 // Create Result object to calculate GPA
-                Result result = new Result(String.valueOf(student.getId()), student.getCourse());
+                Result result = new Result(
+                        String.valueOf(student.getId()),
+                        student.getCourse() != null ? student.getCourse().getCourseId() : "N/A");
                 marks.forEach(result::addSubjectMark);
 
                 // Create row data

@@ -98,7 +98,10 @@ public class StudentDataManager {
 
                         // Set additional fields if they exist
                         if (doc.getString("course") != null) {
-                            student.setCourse(doc.getString("course"));
+                            Course course = getCourseById(doc.getString("course"));
+                            if (course != null) {
+                                student.setCourse(course);
+                            }
                         }
                         if (doc.getDouble("gpa") != null) {
                             student.setGPA(doc.getDouble("gpa"));
@@ -257,48 +260,11 @@ public class StudentDataManager {
     }
 
     public void assignCourseToStudent(String studentId, String courseId) {
-        try {
-            // Try to find student by both string ID and integer ID
-            Document student = null;
-            try {
-                // First try with string ID
-                student = studentsCollection.find(new Document("studentId", studentId)).first();
-
-                // If not found, try with integer ID
-                if (student == null) {
-                    int numericId = Integer.parseInt(studentId);
-                    student = studentsCollection.find(new Document("_id", numericId)).first();
-                }
-            } catch (NumberFormatException e) {
-                // Handle case where ID can't be converted to integer
-                student = studentsCollection.find(new Document("studentId", studentId)).first();
-            }
-
-            if (student == null) {
-                throw new RuntimeException("Student with ID " + studentId + " not found");
-            }
-
-            // Verify course exists
-            Document course = coursesCollection.find(new Document("courseId", courseId)).first();
-            if (course == null) {
-                throw new RuntimeException("Course not found");
-            }
-
-            // Update or insert the course assignment
-            Document query = new Document("studentId", studentId);
-            Document update = new Document("$set", new Document()
-                    .append("courseId", courseId)
-                    .append("updatedAt", new Date()));
-
-            studentCoursesCollection.updateOne(
-                    query,
-                    update,
-                    new com.mongodb.client.model.UpdateOptions().upsert(true));
-
-            System.out.println("Course " + courseId + " assigned/updated for student " + studentId);
-        } catch (Exception e) {
-            System.err.println("Error assigning course: " + e.getMessage());
-            throw new RuntimeException("Error assigning course: " + e.getMessage());
+        Student student = getStudentById(Integer.parseInt(studentId));
+        Course course = getCourseById(courseId);
+        if (student != null && course != null) {
+            student.setCourse(course);
+            updateStudent(student);
         }
     }
 
@@ -474,5 +440,16 @@ public class StudentDataManager {
         } catch (Exception e) {
             throw new RuntimeException("Error updating student GPA: " + e.getMessage());
         }
+    }
+
+    public Course getCourseById(String courseId) {
+        Document doc = coursesCollection.find(new Document("courseId", courseId)).first();
+        if (doc != null) {
+            return new Course(
+                    doc.getString("courseId"),
+                    doc.getString("courseName"),
+                    doc.getString("description"));
+        }
+        return null;
     }
 }

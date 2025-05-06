@@ -85,6 +85,11 @@ public class StudentManagementSystem extends JFrame {
         resultPage.setVisible(true);
     }
 
+    public void showAttendancePage() {
+        AttendancePage attendancePage = new AttendancePage(this);
+        attendancePage.setVisible(true);
+    }
+
     private void initializeUI() {
         setTitle("Student Management System with MongoDB");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -316,7 +321,10 @@ public class StudentManagementSystem extends JFrame {
                     phoneField.getText().trim(),
                     addressField.getText().trim());
             student.setGPA(Double.parseDouble(gpaField.getText().trim()));
-            student.setCourse(courseField.getText().trim());
+            // Fetch Course object from dataManager using the courseField text (assumed to
+            // be courseId)
+            Course course = dataManager.getCourseById(courseField.getText().trim());
+            student.setCourse(course);
 
             dataManager.addStudent(student);
             loadStudentsToTable();
@@ -365,7 +373,10 @@ public class StudentManagementSystem extends JFrame {
                     phoneField.getText().trim(),
                     addressField.getText().trim());
             updatedStudent.setGPA(Double.parseDouble(gpaField.getText().trim()));
-            updatedStudent.setCourse(courseField.getText().trim());
+            // Fetch Course object from dataManager using the courseField text (assumed to
+            // be courseId)
+            Course course = dataManager.getCourseById(courseField.getText().trim());
+            updatedStudent.setCourse(course);
             updatedStudent.setRegistrationDate(existingStudent.getRegistrationDate());
 
             dataManager.updateStudent(updatedStudent);
@@ -445,7 +456,7 @@ public class StudentManagementSystem extends JFrame {
             tableModel.addRow(new Object[] {
                     student.getId(),
                     student.getName(),
-                    student.getCourse(),
+                    student.getCourse() != null ? student.getCourse().getCourseName() : "N/A",
                     student.getAge(),
                     student.getEmail(),
                     student.getPhoneNumber(),
@@ -501,5 +512,9 @@ public class StudentManagementSystem extends JFrame {
                     JOptionPane.ERROR_MESSAGE);
             System.exit(1);
         }
+    }
+
+    public StudentDataManager getDataManager() {
+        return dataManager;
     }
 }

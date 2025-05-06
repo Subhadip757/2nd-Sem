@@ -35,6 +35,16 @@ public class MarksPage extends JFrame {
         courseComboBox = new JComboBox<>(new String[] { "Select Course" });
         studentComboBox = new JComboBox<>(new String[] { "Select Student" });
 
+        // Add course selection listener
+        courseComboBox.addActionListener(e -> {
+            if (courseComboBox.getSelectedIndex() > 0) {
+                updateStudentList();
+            } else {
+                studentComboBox.removeAllItems();
+                studentComboBox.addItem("Select Student");
+            }
+        });
+
         selectionPanel.add(new JLabel("Select Course:"));
         selectionPanel.add(courseComboBox);
         selectionPanel.add(new JLabel("Select Student:"));
@@ -71,19 +81,13 @@ public class MarksPage extends JFrame {
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         add(mainPanel);
-        loadCoursesAndStudents();
+        loadCourses();
     }
 
-    private void loadCoursesAndStudents() {
+    private void loadCourses() {
         try {
             courseComboBox.removeAllItems();
-            studentComboBox.removeAllItems();
-
             courseComboBox.addItem("Select Course");
-            studentComboBox.addItem("Select Student");
-
-            // Debug print
-            System.out.println("Loading students and courses...");
 
             // Fetch courses from database
             List<Course> courses = dataManager.getAllCourses();
@@ -94,21 +98,46 @@ public class MarksPage extends JFrame {
                 courseComboBox.addItem(courseDisplay);
                 System.out.println("Added course: " + courseDisplay);
             }
+        } catch (Exception e) {
+            String errorMsg = "Error loading courses: " + e.getMessage();
+            System.err.println(errorMsg);
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                    errorMsg,
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
 
-            // Fetch students from database
-            List<Student> students = dataManager.getAllStudents();
-            System.out.println("Found " + students.size() + " students");
+    private void updateStudentList() {
+        try {
+            studentComboBox.removeAllItems();
+            studentComboBox.addItem("Select Student");
 
-            for (Student student : students) {
-                if (student != null && student.getStudentId() != null && student.getName() != null) {
-                    String studentDisplay = student.getStudentId() + " - " + student.getName();
+            String selectedCourse = (String) courseComboBox.getSelectedItem();
+            if (selectedCourse == null || selectedCourse.equals("Select Course")) {
+                return;
+            }
+
+            String courseId = selectedCourse.split(" - ")[0];
+            List<Student> studentsInCourse = dataManager.getStudentsInCourse(courseId);
+
+            for (Student student : studentsInCourse) {
+                if (student != null) {
+                    String studentDisplay = student.getId() + " - " + student.getName();
                     studentComboBox.addItem(studentDisplay);
-                    System.out.println("Added student: " + studentDisplay);
+                    System.out.println("Added student to course list: " + studentDisplay);
                 }
             }
 
+            if (studentComboBox.getItemCount() == 1) {
+                JOptionPane.showMessageDialog(this,
+                        "No students enrolled in this course",
+                        "Information",
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
         } catch (Exception e) {
-            String errorMsg = "Error loading courses and students: " + e.getMessage();
+            String errorMsg = "Error loading students for course: " + e.getMessage();
             System.err.println(errorMsg);
             e.printStackTrace();
             JOptionPane.showMessageDialog(this,

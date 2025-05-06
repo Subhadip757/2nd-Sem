@@ -3,6 +3,8 @@ package project;
 import org.bson.Document;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
+import java.util.HashMap;
 
 public class Student {
     private String studentId; // For string-based IDs
@@ -15,6 +17,7 @@ public class Student {
     private String address;
     private double gpa;
     private LocalDateTime registrationDate;
+    private Map<String, Integer> marks;
 
     // Constructor for CRUD operations
     public Student(int id, String name, int age, String email, String phoneNumber, String address, Course course) {
@@ -40,6 +43,8 @@ public class Student {
         this.phoneNumber = phoneNumber;
         this.address = address;
         this.registrationDate = LocalDateTime.now();
+        this.gpa = 0.0;
+        this.marks = new HashMap<>();
     }
 
     // Getters
@@ -83,6 +88,10 @@ public class Student {
         return registrationDate;
     }
 
+    public Map<String, Integer> getMarks() {
+        return marks;
+    }
+
     // Setters
     public void setGPA(double gpa) {
         this.gpa = gpa;
@@ -94,6 +103,21 @@ public class Student {
 
     public void setRegistrationDate(LocalDateTime registrationDate) {
         this.registrationDate = registrationDate;
+    }
+
+    public void setMarks(Map<String, Integer> marks) {
+        this.marks = marks;
+    }
+
+    public void addMark(String subject, int mark) {
+        if (this.marks == null) {
+            this.marks = new HashMap<>();
+        }
+        this.marks.put(subject, mark);
+    }
+
+    public Integer getMark(String subject) {
+        return this.marks != null ? this.marks.get(subject) : null;
     }
 
     // Validation methods
@@ -126,7 +150,8 @@ public class Student {
                 .append("address", address)
                 .append("gpa", gpa)
                 .append("registrationDate",
-                        registrationDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                        registrationDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .append("marks", marks);
     }
 
     public static Student fromDocument(Document doc) {
@@ -142,6 +167,7 @@ public class Student {
         student.setRegistrationDate(LocalDateTime.parse(
                 doc.getString("registrationDate"),
                 DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        student.setMarks(doc.get("marks", Map.class));
         return student;
     }
 

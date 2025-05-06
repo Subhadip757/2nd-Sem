@@ -33,92 +33,220 @@ public class StudentDataManager {
 
     public void addStudent(Student student) {
         try {
-            Document doc = student.toDocument();
+            // First check if student ID already exists
+            if (isDuplicateId(student.getId())) {
+                throw new RuntimeException("Student ID " + student.getId() + " already exists");
+            }
+
+            // Create the student document with all required fields
+            Document doc = new Document()
+                    .append("_id", student.getId())
+                    .append("name", student.getName())
+                    .append("age", student.getAge())
+                    .append("email", student.getEmail())
+                    .append("phoneNumber", student.getPhoneNumber())
+                    .append("address", student.getAddress())
+                    .append("gpa", 0.0) // Initialize GPA as 0
+                    .append("registrationDate", new Date());
+
+            // Insert the document
             studentsCollection.insertOne(doc);
+
+            // Verify the insertion
+            Document verifyDoc = studentsCollection.find(new Document("_id", student.getId())).first();
+            if (verifyDoc == null) {
+                throw new RuntimeException("Failed to verify student insertion");
+            }
+
+            System.out.println("Student added successfully: " + student.getId() + " - " + student.getName());
         } catch (Exception e) {
-            System.err.println("Error adding student: " + e.getMessage());
-            throw new RuntimeException("Failed to add student", e);
+            String errorMessage = "Error adding student: " + e.getMessage();
+            System.err.println(errorMessage);
+            e.printStackTrace();
+            throw new RuntimeException(errorMessage);
         }
     }
 
     public void updateStudent(Student student) {
         try {
-            Bson filter = Filters.eq("_id", student.getId());
-            Bson updates = Updates.combine(
-                    Updates.set("name", student.getName()),
-                    Updates.set("course", student.getCourse()),
-                    Updates.set("age", student.getAge()),
-                    Updates.set("email", student.getEmail()),
-                    Updates.set("phoneNumber", student.getPhoneNumber()),
-                    Updates.set("address", student.getAddress()),
-                    Updates.set("gpa", student.getGPA()));
+            // First verify the student exists
+            Document existingStudent = studentsCollection.find(
+                    new Document("_id", student.getId())).first();
 
-            studentsCollection.updateOne(filter, updates);
+            if (existingStudent == null) {
+                throw new RuntimeException("Student not found with ID: " + student.getId());
+            }
+
+            // Create update document
+            Document updateDoc = new Document()
+                    .append("name", student.getName())
+                    .append("age", student.getAge())
+                    .append("email", student.getEmail())
+                    .append("phoneNumber", student.getPhoneNumber())
+                    .append("address", student.getAddress());
+
+            // If course is being updated, handle course assignments
+            if (student.getCourse() != null) {
+                String newCourseId = student.getCourse().getCourseId();
+                String oldCourseId = existingStudent.getString("course");
+
+                // If course is changing, update course assignments
+                if (oldCourseId != null && !oldCourseId.equals(newCourseId)) {
+                    // Remove from old course
+                    studentCoursesCollection.deleteOne(
+                            new Document()
+                                    .append("studentId", student.getId())
+                                    .append("courseId", oldCourseId));
+                }
+
+                // Add to new course
+                Document assignmentDoc = new Document()
+                        .append("studentId", student.getId())
+                        .append("courseId", newCourseId)
+                        .append("assignedAt", new Date());
+
+                studentCoursesCollection.updateOne(
+                        new Document()
+                                .append("studentId", student.getId())
+                                .append("courseId", newCourseId),
+                        new Document("$set", assignmentDoc),
+                        new UpdateOptions().upsert(true));
+
+                updateDoc.append("course", newCourseId);
+            }
+
+            // Update the student document
+            studentsCollection.updateOne(
+                    new Document("_id", student.getId()),
+                    new Document("$set", updateDoc));
+
+            // Verify the update
+            Document verifyDoc = studentsCollection.find(
+                    new Document("_id", student.getId())).first();
+            if (verifyDoc == null) {
+                throw new RuntimeException("Failed to verify student update");
+            }
+
+            System.out.println("Student updated successfully: " + student.getId());
         } catch (Exception e) {
-            System.err.println("Error updating student: " + e.getMessage());
-            throw new RuntimeException("Failed to update student", e);
+            String errorMessage = "Error updating student: " + e.getMessage();
+            System.err.println(errorMessage);
+            e.printStackTrace();
+            throw new RuntimeException(errorMessage);
         }
     }
 
     public void deleteStudent(int id) {
         try {
-            studentsCollection.deleteOne(Filters.eq("_id", id));
+            // First verify the student exists
+            Document studentDoc = studentsCollection.find(
+                    new Document("_id", id)).first();
+
+            if (studentDoc == null) {
+                throw new RuntimeException("Student not found with ID: " + id);
+            }
+
+            // Get the student's current course
+            String courseId = studentDoc.getString("course");
+
+            // Delete student's course assignments
+            if (courseId != null) {
+                studentCoursesCollection.deleteMany(
+                        new Document("studentId", id));
+            }
+
+            // Delete student's marks
+            MongoCollection<Document> marksCollection = MongoDBConnection.getInstance()
+                    .getDatabase().getCollection("marks");
+            marksCollection.deleteMany(
+                    new Document("studentId", id));
+
+            // Finally, delete the student
+            studentsCollection.deleteOne(
+                    new Document("_id", id));
+
+            // Verify the deletion
+            Document verifyDoc = studentsCollection.find(
+                    new Document("_id", id)).first();
+            if (verifyDoc != null) {
+                throw new RuntimeException("Failed to verify student deletion");
+            }
+
+            System.out.println("Student deleted successfully: " + id);
         } catch (Exception e) {
-            System.err.println("Error deleting student: " + e.getMessage());
-            throw new RuntimeException("Failed to delete student", e);
+            String errorMessage = "Error deleting student: " + e.getMessage();
+            System.err.println(errorMessage);
+            e.printStackTrace();
+            throw new RuntimeException(errorMessage);
         }
     }
 
     public List<Student> getAllStudents() {
         List<Student> students = new ArrayList<>();
         try {
+            // Fetch all students with their current data
             studentsCollection.find().forEach(doc -> {
                 try {
-                    // Try to get string ID first, then fall back to numeric ID
-                    String studentId = doc.getString("studentId");
-                    if (studentId == null) {
-                        Integer numericId = doc.getInteger("_id");
-                        if (numericId != null) {
-                            studentId = String.valueOf(numericId);
-                        }
-                    }
-
+                    // Get basic student information
+                    Integer id = doc.getInteger("_id");
                     String name = doc.getString("name");
+                    Integer age = doc.getInteger("age");
                     String email = doc.getString("email");
                     String phone = doc.getString("phoneNumber");
+                    String address = doc.getString("address");
+                    Double gpa = doc.getDouble("gpa");
+                    String courseId = doc.getString("course");
 
-                    if (studentId != null && name != null) {
-                        Student student = new Student(
-                                doc.getInteger("_id"),
-                                doc.getString("name"),
-                                doc.getInteger("age"),
-                                doc.getString("email"),
-                                doc.getString("phoneNumber"),
-                                doc.getString("address"));
+                    if (id != null && name != null) {
+                        Student student = new Student(id, name, age, email, phone, address);
 
-                        // Set additional fields if they exist
-                        if (doc.getString("course") != null) {
-                            Course course = getCourseById(doc.getString("course"));
+                        // Set GPA if available
+                        if (gpa != null) {
+                            student.setGPA(gpa);
+                        }
+
+                        // Set course if available
+                        if (courseId != null) {
+                            Course course = getCourseById(courseId);
                             if (course != null) {
                                 student.setCourse(course);
                             }
                         }
-                        if (doc.getDouble("gpa") != null) {
-                            student.setGPA(doc.getDouble("gpa"));
+
+                        // Get marks from marks collection
+                        MongoCollection<Document> marksCollection = MongoDBConnection.getInstance()
+                                .getDatabase().getCollection("marks");
+                        Document marksDoc = marksCollection.find(
+                                new Document("studentId", id)).first();
+
+                        if (marksDoc != null) {
+                            Document subjectMarks = marksDoc.get("marks", Document.class);
+                            if (subjectMarks != null) {
+                                Map<String, Integer> marks = new HashMap<>();
+                                for (String subject : Subject.CS_SUBJECTS) {
+                                    Integer mark = subjectMarks.getInteger(subject);
+                                    if (mark != null) {
+                                        marks.put(subject, mark);
+                                    }
+                                }
+                                student.setMarks(marks);
+                            }
                         }
 
                         students.add(student);
-                        System.out.println("Added student to list: " + studentId + " - " + name);
+                        System.out.println("Loaded student: " + id + " - " + name +
+                                (courseId != null ? " (Course: " + courseId + ")" : ""));
                     }
                 } catch (Exception e) {
                     System.err.println("Error parsing student document: " + doc.toJson());
                     e.printStackTrace();
                 }
             });
+
             System.out.println("Total students loaded: " + students.size());
             return students;
         } catch (Exception e) {
-            System.err.println("Database error: " + e.getMessage());
+            System.err.println("Database error while fetching students: " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Error fetching students: " + e.getMessage());
         }
@@ -126,8 +254,30 @@ public class StudentDataManager {
 
     public Student getStudentById(int id) {
         try {
-            Document doc = studentsCollection.find(Filters.eq("_id", id)).first();
-            return doc != null ? documentToStudent(doc) : null;
+            Document doc = studentsCollection.find(new Document("_id", id)).first();
+            if (doc != null) {
+                Student student = new Student(
+                        doc.getInteger("_id"),
+                        doc.getString("name"),
+                        doc.getInteger("age"),
+                        doc.getString("email"),
+                        doc.getString("phoneNumber"),
+                        doc.getString("address"));
+
+                // Set additional fields if they exist
+                if (doc.getDouble("gpa") != null) {
+                    student.setGPA(doc.getDouble("gpa"));
+                }
+                if (doc.getString("course") != null) {
+                    Course course = getCourseById(doc.getString("course"));
+                    if (course != null) {
+                        student.setCourse(course);
+                    }
+                }
+
+                return student;
+            }
+            return null;
         } catch (Exception e) {
             System.err.println("Error getting student by ID: " + e.getMessage());
             throw new RuntimeException("Failed to get student by ID", e);
@@ -260,11 +410,56 @@ public class StudentDataManager {
     }
 
     public void assignCourseToStudent(String studentId, String courseId) {
-        Student student = getStudentById(Integer.parseInt(studentId));
-        Course course = getCourseById(courseId);
-        if (student != null && course != null) {
-            student.setCourse(course);
-            updateStudent(student);
+        try {
+            // First verify both student and course exist
+            Document studentDoc = studentsCollection.find(
+                    new Document("_id", Integer.parseInt(studentId))).first();
+
+            Document courseDoc = coursesCollection.find(
+                    new Document("courseId", courseId)).first();
+
+            if (studentDoc == null) {
+                throw new RuntimeException("Student not found with ID: " + studentId);
+            }
+            if (courseDoc == null) {
+                throw new RuntimeException("Course not found with ID: " + courseId);
+            }
+
+            // Check if student is already enrolled in a course
+            String currentCourseId = studentDoc.getString("course");
+            if (currentCourseId != null && !currentCourseId.equals(courseId)) {
+                // Remove student from current course
+                studentCoursesCollection.deleteOne(
+                        new Document()
+                                .append("studentId", Integer.parseInt(studentId))
+                                .append("courseId", currentCourseId));
+            }
+
+            // Create or update the student-course assignment
+            Document assignmentDoc = new Document()
+                    .append("studentId", Integer.parseInt(studentId))
+                    .append("courseId", courseId)
+                    .append("assignedAt", new Date());
+
+            // Use upsert to either update existing assignment or create new one
+            studentCoursesCollection.updateOne(
+                    new Document()
+                            .append("studentId", Integer.parseInt(studentId))
+                            .append("courseId", courseId),
+                    new Document("$set", assignmentDoc),
+                    new UpdateOptions().upsert(true));
+
+            // Update the student's course field
+            studentsCollection.updateOne(
+                    new Document("_id", Integer.parseInt(studentId)),
+                    new Document("$set", new Document("course", courseId)));
+
+            System.out.println("Successfully assigned course " + courseId + " to student " + studentId);
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("Invalid student ID format: " + studentId);
+        } catch (Exception e) {
+            System.err.println("Error assigning course to student: " + e.getMessage());
+            throw new RuntimeException("Failed to assign course to student: " + e.getMessage());
         }
     }
 
@@ -309,21 +504,28 @@ public class StudentDataManager {
             // Find all student IDs assigned to this course
             studentCoursesCollection.find(new Document("courseId", courseId))
                     .forEach(doc -> {
-                        String studentId = doc.getString("studentId");
-                        Document studentDoc = studentsCollection.find(
-                                new Document("studentId", studentId)).first();
+                        try {
+                            int studentId = doc.getInteger("studentId");
+                            Document studentDoc = studentsCollection.find(
+                                    new Document("_id", studentId)).first();
 
-                        if (studentDoc != null) {
-                            Student student = new Student(
-                                    studentDoc.getString("studentId"),
-                                    studentDoc.getString("name"),
-                                    studentDoc.getString("email"),
-                                    studentDoc.getString("phone"));
-                            students.add(student);
+                            if (studentDoc != null) {
+                                Student student = new Student(
+                                        studentDoc.getInteger("_id"),
+                                        studentDoc.getString("name"),
+                                        studentDoc.getInteger("age"),
+                                        studentDoc.getString("email"),
+                                        studentDoc.getString("phoneNumber"),
+                                        studentDoc.getString("address"));
+                                students.add(student);
+                            }
+                        } catch (Exception e) {
+                            System.err.println("Error processing student document: " + e.getMessage());
                         }
                     });
             return students;
         } catch (Exception e) {
+            System.err.println("Error fetching students in course: " + e.getMessage());
             throw new RuntimeException("Error fetching students in course: " + e.getMessage());
         }
     }

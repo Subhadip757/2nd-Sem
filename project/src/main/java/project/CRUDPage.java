@@ -2,6 +2,7 @@ package project;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -166,7 +167,7 @@ public class CRUDPage extends JFrame {
     }
 
     private void createTable() {
-        String[] columns = { "ID", "Name", "Age", "Email", "Phone", "Address" };
+        String[] columns = { "ID", "Name", "Age", "Email", "Phone", "Address", "Course", "GPA" };
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -260,24 +261,51 @@ public class CRUDPage extends JFrame {
         }
 
         try {
-            int id = Integer.parseInt(idField.getText());
+            int id = Integer.parseInt(idField.getText().trim());
+            String name = nameField.getText().trim();
+            int age = Integer.parseInt(ageField.getText().trim());
+            String email = emailField.getText().trim();
+            String phone = phoneField.getText().trim();
+            String address = addressField.getText().trim();
+
+            // Validate email format
+            if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+                JOptionPane.showMessageDialog(this, "Please enter a valid email address");
+                return;
+            }
+
+            // Validate phone number format (basic validation)
+            if (!phone.matches("^\\d{10}$")) {
+                JOptionPane.showMessageDialog(this, "Please enter a valid 10-digit phone number");
+                return;
+            }
+
+            // Check for duplicate ID
             if (dataManager.isDuplicateId(id)) {
                 JOptionPane.showMessageDialog(this, "Student ID already exists!");
                 return;
             }
 
-            Student student = new Student(
-                    id,
-                    nameField.getText().trim(),
-                    Integer.parseInt(ageField.getText()),
-                    emailField.getText().trim(),
-                    phoneField.getText().trim(),
-                    addressField.getText().trim());
+            // Check for duplicate email
+            if (dataManager.isDuplicateEmail(email)) {
+                JOptionPane.showMessageDialog(this, "Email address already exists!");
+                return;
+            }
 
+            // Check for duplicate phone
+            if (dataManager.isDuplicatePhone(phone)) {
+                JOptionPane.showMessageDialog(this, "Phone number already exists!");
+                return;
+            }
+
+            Student student = new Student(id, name, age, email, phone, address);
             dataManager.addStudent(student);
+
             refreshTable();
             clearFields();
             JOptionPane.showMessageDialog(this, "Student added successfully!");
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Please enter valid numbers for ID and Age");
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error adding student: " + e.getMessage());
         }
@@ -289,19 +317,53 @@ public class CRUDPage extends JFrame {
         }
 
         try {
-            int id = Integer.parseInt(idField.getText());
-            Student student = new Student(
-                    id,
-                    nameField.getText().trim(),
-                    Integer.parseInt(ageField.getText()),
-                    emailField.getText().trim(),
-                    phoneField.getText().trim(),
-                    addressField.getText().trim());
+            int id = Integer.parseInt(idField.getText().trim());
+            String name = nameField.getText().trim();
+            int age = Integer.parseInt(ageField.getText().trim());
+            String email = emailField.getText().trim();
+            String phone = phoneField.getText().trim();
+            String address = addressField.getText().trim();
+
+            // Validate email format
+            if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+                JOptionPane.showMessageDialog(this, "Please enter a valid email address");
+                return;
+            }
+
+            // Validate phone number format
+            if (!phone.matches("^\\d{10}$")) {
+                JOptionPane.showMessageDialog(this, "Please enter a valid 10-digit phone number");
+                return;
+            }
+
+            // Get the existing student to check for email/phone changes
+            Student existingStudent = dataManager.getStudentById(id);
+            if (existingStudent == null) {
+                JOptionPane.showMessageDialog(this, "Student not found!");
+                return;
+            }
+
+            // Check for duplicate email if email is being changed
+            if (!email.equals(existingStudent.getEmail()) && dataManager.isDuplicateEmail(email)) {
+                JOptionPane.showMessageDialog(this, "Email address already exists!");
+                return;
+            }
+
+            // Check for duplicate phone if phone is being changed
+            if (!phone.equals(existingStudent.getPhoneNumber()) && dataManager.isDuplicatePhone(phone)) {
+                JOptionPane.showMessageDialog(this, "Phone number already exists!");
+                return;
+            }
+
+            Student student = new Student(id, name, age, email, phone, address);
+            student.setCourse(existingStudent.getCourse()); // Preserve existing course
 
             dataManager.updateStudent(student);
             refreshTable();
             clearFields();
             JOptionPane.showMessageDialog(this, "Student updated successfully!");
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Please enter valid numbers for ID and Age");
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error updating student: " + e.getMessage());
         }
@@ -312,11 +374,21 @@ public class CRUDPage extends JFrame {
         if (selectedRow >= 0) {
             try {
                 int id = Integer.parseInt(table.getValueAt(selectedRow, 0).toString());
+
+                // Get student details for confirmation message
+                Student student = dataManager.getStudentById(id);
+                if (student == null) {
+                    JOptionPane.showMessageDialog(this, "Student not found!");
+                    return;
+                }
+
                 int confirm = JOptionPane.showConfirmDialog(
                         this,
-                        "Are you sure you want to delete this student?",
+                        "Are you sure you want to delete student " + student.getName() + " (ID: " + id + ")?\n" +
+                                "This will also remove all their course assignments and marks.",
                         "Confirm Delete",
-                        JOptionPane.YES_NO_OPTION);
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE);
 
                 if (confirm == JOptionPane.YES_OPTION) {
                     dataManager.deleteStudent(id);
@@ -328,7 +400,7 @@ public class CRUDPage extends JFrame {
                 JOptionPane.showMessageDialog(this, "Error deleting student: " + e.getMessage());
             }
         } else {
-            JOptionPane.showMessageDialog(this, "Please select a row to delete");
+            JOptionPane.showMessageDialog(this, "Please select a student to delete");
         }
     }
 
@@ -367,18 +439,39 @@ public class CRUDPage extends JFrame {
         try {
             List<Student> students = dataManager.getAllStudents();
             tableModel.setRowCount(0);
+
             for (Student student : students) {
+                String courseInfo = student.getCourse() != null ? student.getCourse().getCourseName() : "Not Enrolled";
+
                 tableModel.addRow(new Object[] {
                         student.getId(),
                         student.getName(),
                         student.getAge(),
                         student.getEmail(),
                         student.getPhoneNumber(),
-                        student.getAddress()
+                        student.getAddress(),
+                        courseInfo,
+                        String.format("%.2f", student.getGPA())
                 });
             }
+
+            // Auto-resize columns to fit content
+            for (int i = 0; i < table.getColumnCount(); i++) {
+                int width = 100; // Default width
+                for (int row = 0; row < table.getRowCount(); row++) {
+                    TableCellRenderer renderer = table.getCellRenderer(row, i);
+                    Component comp = table.prepareRenderer(renderer, row, i);
+                    width = Math.max(comp.getPreferredSize().width + 20, width);
+                }
+                table.getColumnModel().getColumn(i).setPreferredWidth(width);
+            }
+
+            System.out.println("Table refreshed with " + students.size() + " students");
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error refreshing table: " + e.getMessage());
+            String errorMsg = "Error refreshing table: " + e.getMessage();
+            System.err.println(errorMsg);
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, errorMsg, "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 

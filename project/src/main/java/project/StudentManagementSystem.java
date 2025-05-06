@@ -55,21 +55,6 @@ public class StudentManagementSystem extends JFrame {
         coursePage.setVisible(true);
     }
 
-    public void showLeaderboardPage() {
-        try {
-            LeaderboardPage leaderboardPage = new LeaderboardPage(this);
-            leaderboardPage.setVisible(true);
-            System.out.println("Opening Leaderboard Page...");
-        } catch (Exception e) {
-            System.err.println("Error opening Leaderboard Page: " + e.getMessage());
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null,
-                    "Error opening Leaderboard: " + e.getMessage(),
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
     public void showCalendarPage() {
         CalendarPage calendarPage = new CalendarPage(this);
         calendarPage.setVisible(true);

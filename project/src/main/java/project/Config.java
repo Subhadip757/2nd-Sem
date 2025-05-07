@@ -24,3 +24,6 @@ public class Config {
         return properties.getProperty("DATABASE_NAME");
     }
 }
+
+
+

@@ -464,12 +464,6 @@ public class StudentManagementSystem extends JFrame {
         table.clearSelection();
     }
 
-    @Override
-    public void dispose() {
-        MongoDBConnection.closeConnection();
-        super.dispose();
-    }
-
     public static void main(String[] args) {
         try {
             // Initialize database

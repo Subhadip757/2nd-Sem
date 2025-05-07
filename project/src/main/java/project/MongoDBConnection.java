@@ -30,20 +30,6 @@ public class MongoDBConnection {
         return database;
     }
 
-    public static void closeConnection() {
-        if (mongoClient != null) {
-            try {
-                mongoClient.close();
-                System.out.println("MongoDB connection closed");
-            } catch (Exception e) {
-                System.err.println("Error closing MongoDB connection: " + e.getMessage());
-            } finally {
-                database = null;
-                mongoClient = null;
-            }
-        }
-    }
-
     public static MongoDBConnection getInstance() {
         if (instance == null) {
             instance = new MongoDBConnection();

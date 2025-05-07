@@ -122,6 +122,7 @@ public class AttendancePage extends JFrame {
         tableModel.setRowCount(0);
         for (Student student : students) {
             String courseName = (student.getCourse() != null) ? student.getCourse().getCourseName() : "N/A";
+            
             // For demo, generate random attendance between 60 and 100
             int attendance = 60 + (int) (Math.random() * 41);
             tableModel.addRow(new Object[] {

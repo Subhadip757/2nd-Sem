@@ -445,7 +445,11 @@ public class DashboardPage extends JFrame {
         dateTimePanel.add(dateLabel);
         dateTimePanel.add(timeLabel);
 
-        // Event type badge with improved styling
+        // Event type badge with fixed size and improved styling
+        JPanel typePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        typePanel.setBackground(CARD_COLOR);
+        typePanel.setPreferredSize(new Dimension(120, 30)); // Fixed size for all badges
+
         JLabel typeLabel = new JLabel(event.getEventType());
         typeLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
         typeLabel.setForeground(CARD_COLOR);
@@ -453,14 +457,18 @@ public class DashboardPage extends JFrame {
         typeLabel.setOpaque(true);
         typeLabel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(getEventTypeColor(event.getEventType()).darker(), 1, true),
-                BorderFactory.createEmptyBorder(3, 8, 3, 8)));
+                BorderFactory.createEmptyBorder(5, 15, 5, 15))); // Consistent padding
+        typeLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        typeLabel.setPreferredSize(new Dimension(100, 25)); // Fixed size for text
+
+        typePanel.add(typeLabel);
 
         detailsPanel.add(titlePanel);
         detailsPanel.add(Box.createVerticalStrut(10));
         detailsPanel.add(dateTimePanel);
 
         eventCard.add(detailsPanel, BorderLayout.CENTER);
-        eventCard.add(typeLabel, BorderLayout.EAST);
+        eventCard.add(typePanel, BorderLayout.EAST);
 
         container.add(eventCard);
         container.add(Box.createVerticalStrut(10));

@@ -46,7 +46,7 @@ public class StudentDataManager {
                     .append("email", student.getEmail())
                     .append("phoneNumber", student.getPhoneNumber())
                     .append("address", student.getAddress())
-                    .append("gpa", 0.0) // Initialize GPA as 0
+                    .append("gpa", 0.0) 
                     .append("registrationDate", new Date());
 
             // Insert the document

@@ -178,6 +178,5 @@ public class Student {
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.address = address;
-        // Initialize other fields as needed
     }
 }

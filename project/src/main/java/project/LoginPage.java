@@ -4,6 +4,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import java.io.IOException;
+import java.net.URL;
 
 public class LoginPage extends JFrame {
     private JTextField usernameField;
@@ -11,10 +15,29 @@ public class LoginPage extends JFrame {
     private JButton loginButton;
     private JButton exitButton;
     private StudentManagementSystem mainSystem;
+    private ImageIcon userImage;
 
     public LoginPage(StudentManagementSystem mainSystem) {
         this.mainSystem = mainSystem;
+        loadUserImage();
         initializeUI();
+    }
+
+    private void loadUserImage() {
+        try {
+            // Load the image from resources
+            URL imageUrl = getClass().getResource("/images/user-avatar.png");
+            if (imageUrl != null) {
+                userImage = new ImageIcon(imageUrl);
+                // Resize the image to fit the panel
+                Image scaledImage = userImage.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
+                userImage = new ImageIcon(scaledImage);
+            } else {
+                System.err.println("Could not find user image resource");
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading user image: " + e.getMessage());
+        }
     }
 
     private void initializeUI() {
@@ -42,13 +65,28 @@ public class LoginPage extends JFrame {
         JLabel welcomeLabel = new JLabel("Welcome User!", SwingConstants.CENTER);
         welcomeLabel.setFont(new Font("Arial", Font.BOLD, 32));
         welcomeLabel.setForeground(Color.WHITE);
+        welcomeLabel.setBorder(BorderFactory.createEmptyBorder(40, 0, 20, 0));
         leftPanel.add(welcomeLabel, BorderLayout.NORTH);
 
-        // User icon
-        JLabel userIcon = new JLabel("\uD83D\uDC64", SwingConstants.CENTER); // Unicode for user icon
-        userIcon.setFont(new Font("Arial", Font.PLAIN, 140));
-        userIcon.setForeground(Color.WHITE);
-        leftPanel.add(userIcon, BorderLayout.CENTER);
+        // User image
+        JLabel userImageLabel;
+        if (userImage != null) {
+            userImageLabel = new JLabel(userImage);
+        } else {
+            userImageLabel = new JLabel("\uD83D\uDC64");
+            userImageLabel.setFont(new Font("Arial", Font.PLAIN, 140));
+            userImageLabel.setForeground(Color.WHITE);
+        }
+        userImageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        userImageLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 40, 0));
+        leftPanel.add(userImageLabel, BorderLayout.CENTER);
+
+        // Add a subtle shadow effect to the image
+        if (userImage != null) {
+            userImageLabel.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createEmptyBorder(0, 0, 40, 0),
+                    BorderFactory.createLineBorder(new Color(255, 255, 255, 50), 2, true)));
+        }
 
         // RIGHT PANEL (White, Login Form)
         JPanel rightPanel = new JPanel();

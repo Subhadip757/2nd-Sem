@@ -167,7 +167,7 @@ public class CRUDPage extends JFrame {
     }
 
     private void createTable() {
-        String[] columns = { "ID", "Name", "Age", "Email", "Phone", "Address", "Course", "GPA" };
+        String[] columns = { "ID", "Name", "Age", "Email", "Phone", "Address", "Course", "CGPA" };
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
